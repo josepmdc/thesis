@@ -7,9 +7,9 @@
 \usepackage{lastpage}
 \usepackage{lipsum}
 \usepackage{graphicx}
-\graphicspath{ {images/} }
+\usepackage{parskip}
 
-\setlength\parindent{0pt}
+\graphicspath{ {images/} }
 
 \begin{document}
 \begin{titlepage}
@@ -63,12 +63,80 @@
 % Body
 % --------------------------------------
 \section{Introducció i el problema a resoldre}
-\lipsum[1]
+Historicament, generalitzant molt, podem trobar dos tipus de llenguatges: els que 
+són ràpids de programar però lents d'executar (ex. Python), i els que són lents 
+de programar i ràpids d'executar. En l'última decada han aparegut nous
+llenguatges, com ara Go, que intenten situar-se al mig d'aquests dos paradigmes.
+
 \section{Objectiu}
-\lipsum[1]
+L'objectiu d'aquest treball, és dissenyar i implementar un llenguatge de 
+programació que pugui ser executat de forma relativament ràpida, però al mateix 
+temps que permeti al programador tenir una expèriencia el més plàcida possible.
+
+Un altre objectiu del llenguatge és intentar minimitzar al màxim els errors que
+pot cometre el programador, i per tant reduir el nombre de bugs que es poden
+generar en el programa. Per això, serà un llenguatge fortament tipat i inclourà
+algunes propietats de llenguatges funcionals com ara la immutabilitat per 
+defecte (es pot mutar si el programador vol, però ho ha de fer de forma 
+explicita). Si una funció muta l'estat de l'objecte, aquesta ho indicara de 
+forma explicita cada cop que es invocada.
+
+Per tal de que el llenguatge permeti un desenvolupament àgil, la gestió de 
+memòria serà automàtica.
+
+
+
 \section{Metodologia}
-\lipsum[1]
+Per tal d'organitzar el desenvolupament del projecte, s'han dividit les 
+diversers funcionalitats del llenguatge en grans blocs: Un bloc per tenir una 
+funcionalitat bàsica i una sèrie de blocs que afegeixen funcionalitat extra.
+
+Cada bloc després, conté un seguit de tasques a dins, que definiexen de forma
+més granular, que és el que s'ha de desenvolupar.
+
+Per tal de gestionar aquests blocs, és farà servir GitHub, que disposa d'una 
+funcionalitat anomenada "Milestones". Aquesta funcionalitat permet crear blocs
+de tasques ("milestones")  i posar una data límit a cada bloc. Donat que el 
+codi del projecte està allotjat a GitHub, això ens permet enlleçar Pull Requests
+amb les tasques, i quan es completa una PR, la tasca es completa automaticament.
+
+Les "milestones" que s'han definit són les següents:
+
+\begin{enumerate}
+    \item \textbf{Implementació mínima de l'especificació \null\hfill \textsc{Data límit:} 30 de setembre}\\
+        Implementar tota la funcionalitat basica per poder fer programes 
+        numerics senzills. Inclou operacions aritmetiques, funcions, control de 
+        flux bàsic (if statements i bucles while) i declaració de variables.
+
+    \item \textbf{Type declarations \null\hfill \textsc{Data límit:} 10 d'octubre}\\
+        Implementar la funcionalitat necesaria per definir tipus de dades 
+        propis (structs, interficies i type aliases).
+
+    \item \textbf{Collections \null\hfill \textsc{Data límit:} 31 d'octubre}\\
+        TODO
+    
+    \item \textbf{Add an error handling mechanism \null\hfill \textsc{Data límit:} 27 de novembre}\\
+        TODO
+    
+    \item \textbf{Syntactic sugar \null\hfill \textsc{Data límit:} 11 de desembre}\\
+        Implementació de "Syntactic sugar", per tal de simplificar operacions 
+        que s'utilitzen frequentment. Inclou bucles for in, match (similar a un
+        switch), list comprehension, etc.
+    
+    \item \textbf{Support for functional style programming \null\hfill \textsc{Data límit:} 25 de desembre}\\
+        TODO
+\end{enumerate}
+
+Cada una d'aquestes funcionalitats, generalment, es divideixen en tres 
+subtasques principals: implementar el lexer, implementar el parser i 
+implementar la generació de codi.
+
 \section{Passos a seguir (planificació)}
-\lipsum[1]
+
+\section{Definició del llenguatge}
+\begin{itemize}
+    \item Gramàtica
+    \item Exemples de codi
+\end{itemize}
 
 \end{document}

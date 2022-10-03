@@ -86,26 +86,62 @@
 % Body
 % --------------------------------------
 \section{Introducció i el problema a resoldre}
-Històricament, generalitzant molt, podem trobar dos tipus de llenguatges: els que 
-són ràpids de programar però lents d'executar (ex. Python), i els que són lents 
-de programar i ràpids d'executar. En l'última decada han aparegut nous
-llenguatges, com ara Go, que intenten situar-se al mig d'aquests dos paradigmes.
+Històricament, hi ha hagut sempre un dilema entre la rapidesa d'execució, i la
+rapidesa de desenvolupament.
+
+Alguns llenguatges són fàcils de programar: permeten al programador
+despreocupar-se de conceptes de baix nivell com ara la gestió de la memòria,
+i creen abstraccions que agilitzen el desenvolupament. El problema és que
+aquestes abstraccions, limiten l'eficiència del llenguatge, i creen programes
+més lents. Un altre motiu que permet agilitzar el desenvolupament és el tipat
+dinàmic, ja que permet despreocupar-se de quin tipus s'ha de fer servir. Però
+això també té els seus inconvenients, donat que és molt probable que et trobis amb
+errors en temps d'execució. Aquests llenguatges també acostumen a ser interpretats
+per tal d'estalviar al programador l'espera de compilar el programa, però té
+un impacte en el rendiment d'execució del programa si ho comparem amb llenguatges
+compilats. Python seria un dels majors representants d'aquest grup de llenguatges.
+
+En l'altra cara de la moneda i tenim llenguatges com C, els quals no tenen gairebé
+cap abstracció i el programador ha de ser conscient del que fa amb la memòria en
+cada línia de codi que escriu. Són llenguatges que aporten un molt bon rendiment,
+però alenteixen molt el desenvolupament, ja que el programador ha de tenir en
+compte molts conceptes de baix nivell.
+Un problema addicional és que al gestionar la memòria de forma manual, s'obre
+la porta a una gran quantitat d'errors en temps d'execució en la forma de
+memory leaks. Actualment, hi ha llenguatges com Rust que soluciones aquestes
+qüestions de gestió de memòria sense perdre rendiment, però el desenvolupament
+continua sent lent i el temps de compilació llarg. Aquests llenguatges, també
+acostumen a ser fortament tipats, cosa que redueix els errors en temps
+d'execució, però alenteix el desenvolupament.
+
 
 \section{Objectiu}
-L'objectiu d'aquest treball, és dissenyar i implementar un llenguatge de 
-programació que pugui ser executat de forma relativament ràpida, però al mateix 
-temps que permeti al programador tenir una expèriencia el més plàcida possible.
 
-Un altre objectiu del llenguatge és intentar minimitzar al màxim els errors que
-pot cometre el programador, i per tant reduir el nombre de bugs que es poden
-generar en el programa. Per això, serà un llenguatge fortament tipat i inclourà
-algunes propietats de llenguatges funcionals com ara la immutabilitat per 
-defecte (es pot mutar si el programador vol, però ho ha de fer de forma 
-explicita). Si una funció muta l'estat de l'objecte, aquesta ho indicara de 
-forma explicita cada cop que es invocada.
+Podem veure que disposem de dos paradigmes ben oposats: un busca el rendiment a
+canvi d'un desenvolupament lent, mentre l'altre prefereix agilitzar el
+desenvolupament, però alentir l'execució. L'objectiu d'aquest treball,
+és crear un llenguatge de programació que se situï al mig d'aquests dos
+paradigmes, fent sacrificis per ambdues bandes.
 
-Per tal de que el llenguatge permeti un desenvolupament àgil, la gestió de 
-memòria serà automàtica.
+Sacrificis en l'agilitat de desenvolupament:
+\begin{itemize}
+    \item \textbf{Compilat}: Serà un llenguatge compilat, per tal d'obtenir un
+        bon rendiment i evitar al màxim els erros en temps d'execució.
+    \item \textbf{Fortament tipat}: Per evitar al màxim l'aparició d'errors en
+        temps d'execució, i també perquè ajuda a documentar el codi, facilitant
+        la seva lectura.
+    \item \textbf{Immutabilitat}: S'intentarà forçar la immutabilitat sempre que
+        sigui possible, per així evitar els efectes secundaris, i facilitar la depuració
+        del codi
+\end{itemize}
+
+Sacrificis en el rendiment d'execució
+\begin{itemize}
+    \item \textbf{Gestió de memòria automàtica}: L'usuari no s'haurà de preocupar
+        d'eliminar la memòria de forma manual. Hi haurà un Garbage Collector,
+        cosa que penalitza en el rendiment, però redueix memory leaks i agilitza
+        el desenvolupament.
+\end{itemize}
 
 \section{Definició del llenguatge}
 
@@ -115,10 +151,10 @@ Per importar llibreries externes s'utilitzen imports
 import math
 \end{code}
 
-Podem definir constants globals, però no variables
-Amb això es busca evitar comportaments estranys del programa i bugs difícils
-de trobar, ja que les variables globals poden ser modificada des de qualsevol
-lloc.
+Podem definir constants globals, però no variables. Amb això es busca evitar
+comportaments estranys del programa i bugs difícils de trobar, ja que les
+variables globals poden ser modificada des de qualsevol lloc i costa trobar
+qui és que l'està canviant.
 
 \begin{code}
 const MAX_SPEED = 120;
@@ -133,10 +169,10 @@ fn main() {
 }
 \end{code}
 
-Per declarar una funció es fa amb la paraula reservada fn, seguit del nom de la 
+Per declarar una funció es fa amb la paraula reservada fn, seguit del nom de la
 funció i els paràmetres entre parèntesis, i finalment el tipus del valor de retorn.
 Quan l'última expressió no acaba en punt i coma, el resultat serà el que retornarà
-la funció. És l'únic cas en que es permet no posar punt i coma.
+la funció. És l'únic cas en què es permet no posar punt i coma.
 
 \begin{code}
 fn radius(circumference: i32) i32 {
@@ -146,7 +182,7 @@ fn radius(circumference: i32) i32 {
 
 \subsection{Definició de tipus}
 
-Si volem definir tipus genèrics podem definir interficies:
+Si volem definir tipus genèrics, podem definir interfícies:
 
 \begin{code}
 interface Person {
@@ -154,17 +190,17 @@ interface Person {
 }
 \end{code}
 
-Això ens permet tenir diferentes implementacions, amb comportaments diferents.
+Això ens permet tenir diferents implementacions, amb comportaments diferents.
 
-Per crear tipus propis, és fan servir structs. Permeten definir camps de diferents
-tipus i definir metodes que modifiquen l'estat de l'objecte. 
+Per crear tipus propis, es fan servir structs. Permeten definir camps de diferents
+tipus i definir mètodes que modifiquen l'estat de l'objecte.
 
-Els camps i els mètodes, per defecte són privats, però es poden fer publics.
+Els camps i els mètodes, per defecte són privats, però es poden fer públics.
 En el cas de les funcions amb la paraula reservada "pub". En el cas dels camps,
-afegin entre claus (\{\}), les paraules get o set, depenent de si volem que sigui publica
+afegim entre claus (\{\}), les paraules get o set, depenent de si volem que sigui pública
 per escriptura, lectura o per les dues coses.
 
-Per implementar una interficie, afegim dos punts i el nom de la interficie just 
+Per implementar una interfície, afegim dos punts i el nom de la interfície just
 després del nom del struct.
 
 \begin{code}
@@ -179,7 +215,7 @@ struct User : Person {
 }
 \end{code}
 
-Amb l'struct anterior, podriem per exemple fer el següent:
+Amb l'struct anterior, podríem per exemple fer el següent:
 
 \begin{code}
 let user = User { age: 24, name: "John Doe" };
@@ -187,10 +223,10 @@ user.age = 25;
 println(user.name);
 \end{code}
 
-Però no podriem modificar el camp \textit{name}.
+Però no podríem modificar el camp \textit{name}.
 
-No es obligatori definir constructor, pero si es vol, l'estandard és crear una
-funció estatica que es digui \textit{new}.
+No és obligatori definir constructor, però si es vol, l'estàndard és crear una
+funció estàtica que es digui \textit{new}.
 
 \begin{code}
 // constructor
@@ -202,7 +238,7 @@ pub static fn new(age: i32, name: string) self {
 }
 \end{code}
 
-Per cridar les funcions estatiques es fa de la següent manera:
+Per cridar les funcions estàtiques es fa de la següent manera:
 
 \begin{code}
 // static: struct_name::static_fn()
@@ -212,8 +248,8 @@ user.change_name("Jane Doe");
 \end{code}
 
 Podem definir mètodes fora de la definició del struct. Un cas on seria útil,
-per exemple, seria quan treballem amb una entitat amb moltes funcions i volem 
-dividir-ho en multiples fitxers.
+per exemple, seria quan treballem amb una entitat amb moltes funcions i volem
+dividir-ho en múltiples fitxers.
 
 \begin{code}
 struct User {
@@ -226,15 +262,15 @@ pub fn (User) get_name() string {
 \end{code}
 
 Quan un mètode muta l'estat d'un objecte, aquesta funció ho ha d'indicar de forma
-explicita. Amb això és busca facilitar la vida al programador a l'hora de programar, 
-llegir el codi o debugar, ja que només llegint la crida o la definició, sap que
+explícita. Amb això es busca facilitar la vida al programador a l'hora de programar,
+llegir el codi o depurar, ja que només llegint la crida o la definició, sap que
 la funció té efectes secundaris.
 
 Per tal d'indicar aquesta mutació, el programador, ha d'afegir la paraula "mut",
-a la definició de la funció, i cada cop que la crida, s'ha d'afegir un signe 
+a la definició de la funció, i cada cop que la crida, s'ha d'afegir un signe
 d'exclamació al final de l'identificador (ex: {\ttfamily function!(a, b)}).
 
-El mateix passa amb les variables. Per defecte son immutables. Si es vol mutar 
+El mateix passa amb les variables. Per defecte són immutables. Si es vol mutar
 una variable, s'ha d'afegir la paraula "mut".
 
 \begin{code}
@@ -253,8 +289,8 @@ fn modify_struct() {
 
 \subsection{Bucles}
 
-Per tal d'executar repetidament instruccions es fan servir bucles. N'hi ha de 
-diferents tipus. El més bàsic es el while:
+Per tal d'executar repetidament instruccions es fan servir bucles. N'hi ha de
+diferents tipus. El més bàsic és el while:
 
 \begin{code}
 let mut a = 0;
@@ -265,11 +301,11 @@ while i < 10 {
 }
 \end{code}
 
-Un altre opció, és el bucle for:
+Un altra opció, és el bucle for:
 
 \begin{code}
 let mut a = 0;
-// No need for "mut" when declaring i, it's implied
+// No need for "mut" when declaring variables on for loop declarations, it's implied
 for let i = 0; i < 10; i += 1 {
     a += i;
 }
@@ -310,10 +346,10 @@ for number in numbers {
 
 \subsection{Programació Funcional}
 
-Per tal de simplificar algunes operacions que es realitzen amb frequencia, hi 
-haurà algunes funcions com ara map, reduce, fold, etc. que ens permetran 
-realitzar aquestes operacions amb moltes menys linies. Per tal de poder fer servir
-aquestes funcions, és fara ús de "closures".
+Per tal de simplificar algunes operacions que es realitzen amb freqüència, hi
+haurà algunes funcions com ara map, reduce, fold, etc. que ens permetran
+escriure aquestes operacions amb moltes menys línies. Per tal de poder fer servir
+aquestes funcions, es farà ús de "closures" o clausures.
 
 \begin{code}
 fn functional_style(numbers: [i32]) {
@@ -336,10 +372,9 @@ fn functional_style(numbers: [i32]) {
 }
 \end{code}
 
-
-Les closures, ens permeten tenir funcions de primer ordre, el que vol dir que 
-es poden assignar a una variable, per exemple, o ser retornades per una altre 
-funció.
+Les clausures ens permeten tenir funcions de primer ordre, el que vol dir que
+les podem tractar com a qualsevol expressió, assignant-les a una variable, per 
+exemple, o sent retornades per una altra funció.
 
 \begin{code}
 fn two_plus_two() {
@@ -367,16 +402,16 @@ let is_valid =
     |> validate_age;
 \end{code}
 
-El que fa el pipe, és passar l'expressió de l'esquerra, com a parametre de la 
+El que fa el pipe, és passar l'expressió de l'esquerra, com a paràmetre de la
 funció que hi ha a la dreta.
 
 \subsection{Gestió d'errors}
 
-Les funcions poden returnar el que s'en diu un Result. Un Result, es un enum
-que te dos valors possibles: {\ttfamily Ok(T) i Err(E)}, on T és l'element que retorna la 
+Les funcions poden retornar el que se'n diu un Result. Un Result, és un enum
+que té dos valors possibles: {\ttfamily Ok(T) i Err(E)}, on T és l'element que retorna la
 funció, i E és l'error que retorna la funció.
 
-Al indicar el tipus de retorn com a Result, hem d'indicar el tipus del valor que 
+En indicar el tipus de retorn com a Result, hem d'indicar el tipus del valor que
 retorna la funció, i el tipus de l'error: {\ttfamily Result<TipusOk, TipusErr> }
 
 \begin{code}
@@ -402,8 +437,8 @@ fn call_divide() -> Result<i32, string> {
 }
 \end{code}
 
-Com que pot ser una mica engorros haver de comprovar l'error en cada crida, hi
-ha l'operador "?" que ens permet retornar imediatament en cas que el resultat
+Com que pot ser una mica empipador haver de comprovar l'error en cada crida, hi
+ha l'operador "?" que ens permet retornar immediatament en cas que el resultat
 sigui un error:
 
 \begin{code}
@@ -422,13 +457,14 @@ retornar un error.
 
 \subsection{Referències}
 
-Si a un tipus l'hi afegim un {\ttfamily \&} a davant, passara a ser una referència. Les 
+Si a un tipus l'hi afegim un {\ttfamily \&} a davant, passarà a ser una referència. Les
 referències en permeten apuntar directament a una posició de memòria, i passar
 aquest apuntador, sense la necessitat de copiar l'objecte. Per defecte les
-referències, igual que les variables, són immutables, però es poden mutar, si 
-afegim la paraula mut. En cas de que la referencia sigui mutable, es modificara
-la posició de memoria a on apunta, per tant totes les referencies que llegueixin
-d'aquesta posició de memoria veuran el canvi.
+referències, igual que les variables, són immutables, però es poden mutar, si
+afegim la paraula mut. En cas que la referència sigui mutable, es modificarà
+la posició de memòria a on apunta, per tant, totes les referències que llegeixin
+d'aquesta posició de memòria veuran el canvi. És a dir, venen a ser apuntadors
+ensucrats, similar a C++.
 
 \begin{code}
 // References are immutable by default but we can make them mutable
@@ -445,30 +481,30 @@ fn references(numbers: &[i32], other_numbers: &mut [i32]) {
 
 \section{Passos a seguir}
 
-Abans de començar a fer qualsevol cosa, em d'escollir la tecnologia amb la que
-volem implementar el compilardor. Per aquest projecte, s'ha escollit a Rust com
+Abans de començar a fer qualsevol cosa, hem d'escollir la tecnologia amb la qual
+volem implementar el compilador. Per aquest projecte, s'ha escollit a Rust com
 llenguatge de programació i a LLVM \cite{llvm_website} com a toolchain per a la generació de codi
-del back-end. LLVM ens permetra generar assemblador per pràcticament qualsevol
-arquitectura que existeixi avui en dia, sense haver de fer cap esforç adicional.
-Només en haurem d'encarregar de generar la IR de LLVM, i aquest s'encarragara de
-generar l'assemblador a partir del IR. La API de LLVM esta només per C/C++, per
-tant també farem servir una llibreria que es diu Inkwell \cite{inkwell}, que ens ofereix una
-API per a Rust, interectuant amb la API de C.
+del back-end. LLVM ens permetrà generar assemblador per pràcticament qualsevol
+arquitectura que existeixi avui en dia, sense haver de fer cap esforç addicional.
+Només ens haurem d'encarregar de generar la IR de LLVM, i aquest s'encarregarà de
+generar l'assemblador a partir de l'IR. L'API de LLVM està només per C/C++, per
+tant, també farem servir una llibreria que es diu Inkwell \cite{inkwell}, que ens ofereix una
+API per a Rust, interactuant amb l'API de C.
 
-Un cop escollides les tecnologies el següent pas es crear un entorn i una 
+Un cop escollides les tecnologies el següent pas és crear un entorn i una
 estructura de projecte base, on hi podem anar afegint totes les funcionalitats
-adicionals.
+addicionals.
 
 Per tal d'implementar les funcionalitats definides, seguirem un procés similar
 amb totes. Haurem de fer tres coses:
 
 \begin{enumerate}
-    \item \textbf{Lexer}: El lexer s'encarrega de llegir el nostre codi, i 
-        convertir-lo a un seguit de tokens. Un token és un conjunt de caracter 
-        en el codi font que te algun signidicat en el lleguatge, com ara una paraula 
-        clau del lleguatge (if, for, ...), o l'identificador d'una variable.
-        Per cada funcionalitat, haurem d'adaptar el Lexer perque ens reconegui 
-        aquests nous token que s'introdueixin al llenguatge.
+    \item \textbf{Lexer}: El lexer s'encarrega de llegir el nostre codi, i
+        convertir-lo a un seguit de tokens. Un token és un conjunt de caràcter
+        en el codi font que té algun significat en el llenguatge, com ara una paraula
+        clau del llenguatge (if, for, ...), o l'identificador d'una variable.
+        Per cada funcionalitat, haurem d'adaptar el Lexer perquè ens reconegui
+        aquests nous tokens que s'introdueixin al llenguatge.
     \item \textbf{Parser}: El parser recorre la seqüència de tokens que ens
         retorna el lexer i l'hi busca el significat. El resultat del parser és
         un arbre sintàctic, que ens indicarà com s'han d'executar les instruccions.
@@ -480,40 +516,40 @@ amb totes. Haurem de fer tres coses:
 
 \section{Metodologia i planificació}
 Per tal d'organitzar el desenvolupament del projecte s'ha optat per una metodologia
-basada en sprints, on cada sprint té un duració d'una setmana. Donat que és un 
-projecte gran, s'ha dividit en un conjunt d'epiques, que representen un conjunt 
-de funcionalitats. Cada una d'aquestes epiques, conte un seguit de subtasques, i
-completar cada una d'aquestes epiques requereix d'uns quants sprints. Les epiques
+basada en sprints, on cada sprint té una duració d'una setmana. Donat que és un
+projecte gran, s'ha dividit en un conjunt d'èpiques, que representen un conjunt
+de funcionalitats. Cada una d'aquestes èpiques, conte un seguit de subtasques, i
+completar cada una d'aquestes èpiques requereix d'uns quants sprints. Les èpiques
 que s'han definit són les següents:
 
 \begin{enumerate}
     \item \textbf{Implementació mínima de l'especificació}\\
-        Implementar tota la funcionalitat basica per poder fer programes senzills.
-        Inclou operacions aritmetiques, funcions, control de flux bàsic (if 
+        Implementar tota la funcionalitat bàsica per poder fer programes senzills.
+        Inclou operacions aritmètiques, funcions, control de flux bàsic (if
         statements i bucles while) i declaració de variables.
 
     \item \textbf{Declaració de tipus} \\
-        Implementar la funcionalitat necesaria per definir tipus de dades 
+        Implementar la funcionalitat necessària per definir tipus de dades
         propis (structs, interficies i type aliases).
 
     \item \textbf{Collections}\\
         Implementació d'arrays estàtics, arrays dinàmics i tuples.
-    
+
     \item \textbf{Mecanisme de gestió d'errors}\\
         Implementar un mecanisme per tal de gestionar errors en temps d'execució.
-    
+
     \item \textbf{Syntactic sugar}\\
-        Implementació de "Syntactic sugar", per tal de simplificar operacions 
-        que s'utilitzen frequentment. Inclou bucles for in, match (similar a un
+        Implementació de "Syntactic sugar", per tal de simplificar operacions
+        que s'utilitzen freqüentment. Inclou bucles for in, match (similar a un
         switch), list comprehension, etc.
-    
-    \item \textbf{Support for functional style programming}\\
-        Afegir suport per programació d'estil funcional, integrant funcions com 
+
+    \item \textbf{Suport per programació d'estil funcional}\\
+        Afegir suport per programació d'estil funcional, integrant funcions com
         ara map, reduce, fold, etc.
 \end{enumerate}
 
-Per tal de gestionar totes aquestes epiques, les seves subtasques i els sprints,
-es fara servir Jira, un programa de gestió de projectes que ho facilita molt.
+Per tal de gestionar totes aquestes èpiques, les seves subtasques i els sprints,
+es farà servir Jira, un programa de gestió de projectes que ho facilita molt.
 
 \begin{figure}
     \includegraphics[width=\linewidth]{roadmap}

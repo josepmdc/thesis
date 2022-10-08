@@ -10,6 +10,9 @@
 \usepackage{listings, listings-rust}
 \usepackage{hyperref}
 \usepackage{url}
+\usepackage{caption}
+
+\Urlmuskip=0mu plus 2mu
 
 \hypersetup{
     colorlinks=true,
@@ -96,30 +99,29 @@ aquestes abstraccions, limiten l'eficiència del llenguatge, i creen programes
 més lents. Un altre motiu que permet agilitzar el desenvolupament és el tipat
 dinàmic, ja que permet despreocupar-se de quin tipus s'ha de fer servir. Però
 això també té els seus inconvenients, donat que és molt probable que et trobis amb
-errors en temps d'execució. Aquests llenguatges també acostumen a ser interpretats
-per tal d'estalviar al programador l'espera de compilar el programa, però té
-un impacte en el rendiment d'execució del programa si ho comparem amb llenguatges
-compilats. Python seria un dels majors representants d'aquest grup de llenguatges.
+errors en temps d'execució. Aquests llenguatges acostumen a ser interpretats
+per tal d'estalviar l'espera al programador, però té un impacte en el rendiment 
+d'execució del programa si ho comparem amb llenguatges compilats. Python, per 
+exemple, seria un dels majors representants d'aquest grup de llenguatges.
 
 En l'altra cara de la moneda i tenim llenguatges com C, els quals no tenen gairebé
-cap abstracció i el programador ha de ser conscient del que fa amb la memòria en
-cada línia de codi que escriu. Són llenguatges que aporten un molt bon rendiment,
-però alenteixen molt el desenvolupament, ja que el programador ha de tenir en
-compte molts conceptes de baix nivell.
+cap abstracció i el programador ha de ser conscient del que fa en cada línia de
+codi que escriu. Són llenguatges que aporten un molt bon rendiment, però 
+alenteixen molt el desenvolupament, ja que el programador ha de tenir en compte 
+molts conceptes de baix nivell.
 Un problema addicional és que al gestionar la memòria de forma manual, s'obre
 la porta a una gran quantitat d'errors en temps d'execució en la forma de
 memory leaks. Actualment, hi ha llenguatges com Rust que soluciones aquestes
 qüestions de gestió de memòria sense perdre rendiment, però el desenvolupament
-continua sent lent i el temps de compilació llarg. Aquests llenguatges, també
-acostumen a ser fortament tipats, cosa que redueix els errors en temps
-d'execució, però alenteix el desenvolupament.
-
+continua sent lent i el temps de compilació llarg. Aquests llenguatges acostumen 
+a ser fortament tipats, cosa que redueix els errors en temps d'execució, però 
+alenteix el desenvolupament.
 
 \section{Objectiu}
 
 Podem veure que disposem de dos paradigmes ben oposats: un busca el rendiment a
 canvi d'un desenvolupament lent, mentre l'altre prefereix agilitzar el
-desenvolupament, però alentir l'execució. L'objectiu d'aquest treball,
+desenvolupament a canvi d'alentir l'execució. L'objectiu d'aquest treball,
 és crear un llenguatge de programació que se situï al mig d'aquests dos
 paradigmes, fent sacrificis per ambdues bandes.
 
@@ -151,15 +153,6 @@ Per importar llibreries externes s'utilitzen imports
 import math
 \end{code}
 
-Podem definir constants globals, però no variables. Amb això es busca evitar
-comportaments estranys del programa i bugs difícils de trobar, ja que les
-variables globals poden ser modificada des de qualsevol lloc i costa trobar
-qui és que l'està canviant.
-
-\begin{code}
-const MAX_SPEED = 120;
-\end{code}
-
 El punt d'inici del programa és a la funció main.
 
 \begin{code}
@@ -169,8 +162,42 @@ fn main() {
 }
 \end{code}
 
+Les variables, per defecte, són immutables. Amb això es busca limitar sempre
+que es pugui els efectes secundaris. Si es vol mutar una variable, s'ha d'afegir
+la paraula \textit{mut} al declarar-la:
+
+\begin{code}
+let a = 0;
+a += 1; // invalid
+
+let mut a = 0;
+a += 1; // valid
+\end{code}
+
+Podem definir constants i variables globals, però les variables no poden ser
+mai mutables, és a dir un cop inicialitzades, el seu valor serà constant. 
+Amb això es busca evitar comportaments estranys del programa i bugs difícils de
+trobar, ja que les variables globals poden ser modificada des de qualsevol lloc 
+i costa trobar qui és que l'està canviant. Un altre problema de les variables 
+globals és el multithreading, ja que s'ha de controlar l'accés a aquestes, per 
+tal d'evitar \textit{race conditions}.
+
+\begin{code}
+const MAX_SPEED = 120;
+let MIN_SPEED = get_config("MIN_SPEED");
+\end{code}
+
+En l'exemple anterior, la funció get\_config s'executa a l'iniciar el programa,
+retorna un valor, i s'assigna a MIN\_SPEED. Després d'això, el valor ja no es
+pot modificar.
+
+Si segueixes necesitant variables globals que siguin mutables, hauràs de canviar
+el disseny del teu codi perquè passi les variables a les funcions per paràmetre.
+Si tens molts paràmetres, els pots englobar en un struct, que veurem més endavant.
+Aquesta filosofia és similar a la que segueix Haskell \cite{globals-haskell}.
+
 Per declarar una funció es fa amb la paraula reservada fn, seguit del nom de la
-funció i els paràmetres entre parèntesis, i finalment el tipus del valor de retorn.
+funció, els paràmetres entre parèntesis, i finalment el tipus del valor de retorn.
 Quan l'última expressió no acaba en punt i coma, el resultat serà el que retornarà
 la funció. És l'únic cas en què es permet no posar punt i coma.
 
@@ -178,6 +205,32 @@ la funció. És l'únic cas en què es permet no posar punt i coma.
 fn radius(circumference: i32) i32 {
     circumference / (2 * math.PI)
 }
+\end{code}
+
+\subsection{Tipus}
+Els tipus definits pel llenguatge són:
+
+\begin{itemize}
+    \item \textbf{i32}: Enters de 32 bits
+    \item \textbf{i64}: Enters de 64 bits
+    \item \textbf{f32}: Nombres en coma flotant de 32 bits
+    \item \textbf{f64}: Nombres en coma flotant de 64 bits
+    \item \textbf{bool}: true o false
+    \item \textbf{string}: Cadenes de caràcters
+    \item \textbf{arrays}: Conjunt d'elements del mateix tipus
+\end{itemize}
+
+Per declarar arrays, es fa de la forma següent:
+
+\begin{code}
+let array = [1, 2, 3, 4];
+
+// o
+
+let mut array = i32[4]; // len == 4
+array[0] = 1;
+array[1] = 2;
+// ...
 \end{code}
 
 \subsection{Definició de tipus}
@@ -276,7 +329,7 @@ una variable, s'ha d'afegir la paraula "mut".
 \begin{code}
 struct User {
     name: string;
-    pub mut fn set_name(self, name: string) string {
+    pub mut fn set_name(name: string) string {
         self.name = name;
     }
 }
@@ -314,9 +367,8 @@ for let i = 0; i < 10; i += 1 {
 Per iterar arrays, tenim el bucle for in, que recorre l'array element per element.
 
 \begin{code}
-let mut a = 0;
 for number in numbers {
-
+    print(number);
 }
 \end{code}
 
@@ -356,9 +408,11 @@ fn functional_style(numbers: [i32]) {
     // Functional style with closures
     let numbers_plus_one = numbers.map(|x| -> x + 1);
 
-    let sum = numbers.reduce(|sum, number| -> {
-        if number % 2 == 0 {
-            sum + number
+    let sum = numbers.reduce(|prev, current| -> {
+        if current % 2 == 0 {
+            prev + current
+        } else {
+            prev
         }
     });
 
@@ -415,11 +469,11 @@ En indicar el tipus de retorn com a Result, hem d'indicar el tipus del valor que
 retorna la funció, i el tipus de l'error: {\ttfamily Result<TipusOk, TipusErr> }
 
 \begin{code}
-fn divide(a i32, b i32) Result<i32, string> {
+fn divide(a: i32, b: i32) Result<i32, string> {
     if b == 0 {
         return Err("Divide by zero");
     }
-    return Ok(a / b)
+    Ok(a / b)
 }
 \end{code}
 
@@ -431,6 +485,13 @@ fn call_divide() -> Result<i32, string> {
         Ok(num) => num,
         Err(err) => return Err(err),
     }
+
+    let result = try divide(5, 0) -> |err| {
+        log("Error: ", err);
+        return Err(err);
+    };
+
+    let result = try divide(5, 0);
 
     print("The result is: ", result);
     Ok(result)
@@ -486,10 +547,11 @@ volem implementar el compilador. Per aquest projecte, s'ha escollit a Rust com
 llenguatge de programació i a LLVM \cite{llvm_website} com a toolchain per a la generació de codi
 del back-end. LLVM ens permetrà generar assemblador per pràcticament qualsevol
 arquitectura que existeixi avui en dia, sense haver de fer cap esforç addicional.
-Només ens haurem d'encarregar de generar la IR de LLVM, i aquest s'encarregarà de
-generar l'assemblador a partir de l'IR. L'API de LLVM està només per C/C++, per
-tant, també farem servir una llibreria que es diu Inkwell \cite{inkwell}, que ens ofereix una
-API per a Rust, interactuant amb l'API de C.
+Només ens haurem d'encarregar de generar la representació intermèdia (IR) de LLVM,
+i aquest s'encarregarà de generar l'assemblador a partir de l'IR. L'API de LLVM 
+està només per C/C++, per tant, també farem servir una llibreria que es diu 
+Inkwell \cite{inkwell}, que ens ofereix una API per a Rust, interactuant amb 
+l'API de C oficial.
 
 Un cop escollides les tecnologies el següent pas és crear un entorn i una
 estructura de projecte base, on hi podem anar afegint totes les funcionalitats
@@ -499,18 +561,20 @@ Per tal d'implementar les funcionalitats definides, seguirem un procés similar
 amb totes. Haurem de fer tres coses:
 
 \begin{enumerate}
-    \item \textbf{Lexer}: El lexer s'encarrega de llegir el nostre codi, i
-        convertir-lo a un seguit de tokens. Un token és un conjunt de caràcter
-        en el codi font que té algun significat en el llenguatge, com ara una paraula
-        clau del llenguatge (if, for, ...), o l'identificador d'una variable.
-        Per cada funcionalitat, haurem d'adaptar el Lexer perquè ens reconegui
-        aquests nous tokens que s'introdueixin al llenguatge.
+    \item \textbf{Lexer}: El lexer, format per l'scanner i el tokenizer,
+        s'encarrega de llegir el nostre codi, i convertir-lo a un seguit de 
+        tokens. Un token és un conjunt de caràcters en el codi font que té algun 
+        significat en el llenguatge, com ara una paraula clau del llenguatge 
+        (if, for, ...), o l'identificador d'una variable. Per cada funcionalitat, 
+        haurem d'adaptar el Lexer perquè ens reconegui aquests nous tokens que
+        s'introdueixin al llenguatge.
     \item \textbf{Parser}: El parser recorre la seqüència de tokens que ens
         retorna el lexer i l'hi busca el significat. El resultat del parser és
         un arbre sintàctic, que ens indicarà com s'han d'executar les instruccions.
         Per cada nova funcionalitat, haurem de modificar el parser perquè pugui
         interpretar els nous constructes.
-    \item \textbf{Generació de codi}:
+    \item \textbf{Generació de codi}: Per cada nova funcionalitat s'haurà de 
+        generar la IR de LLVM que després generarà l'assemblador que s'executarà.
 \end{enumerate}
 
 
@@ -549,33 +613,154 @@ que s'han definit són les següents:
 \end{enumerate}
 
 Per tal de gestionar totes aquestes èpiques, les seves subtasques i els sprints,
-es farà servir Jira, un programa de gestió de projectes que ho facilita molt.
+es farà servir \textbf{Jira}, un programa de gestió de projectes que ho facilita molt.
 
 \begin{figure}
     \includegraphics[width=\linewidth]{roadmap}
-    \caption{Roadmap on es mostren les diferents èpiques i l'espai de temps on s'han de desenvolupar}
+    \centering
+    \captionsetup{justification=centering}
+    \caption{Roadmap on es mostren les diferents èpiques i l'espai de temps on s'han de desenvolupar (fer zoom per veure-ho amb més resolució)}
 \end{figure}
 
-Cada una d'aquestes funcionalitats, generalment, es divideixen en tres 
-subtasques principals: implementar el lexer, implementar el parser i 
-implementar la generació de codi.
+\section{Fonts d'informació}
+Donat que crear un llenguatge de programació és un projecte de certa magnitud,
+les fonts d'informació no són poques. Principalment, podem dividir les fonts en
+dos grups: fonts per dissenyar el llenguatge i fonts per implementar el llenguatge.
 
-\section{Inspiració}
-La gran majoria de funcionalitats descrites en l'apartat anterior han siguit 
-inspirades d'altres llenguatges ja existents. La sintaxi és similar a la de Rust,
-però agafant conceptes d'altres llenguatges i paradigmes. Per exemple:
+\subsection{Dissenyar del llenguatge}
+La gran majoria de funcionalitats descrites en aquest document han sigut
+inspirades d'altres llenguatges ja existents. S'han agafat les següents idees de
+diferents llenguatges i paradigmes:
 
 \begin{enumerate}
-    \item \textbf{List comprehension}: Python
-    \item \textbf{Iteradors (map, reduce, ...)}: Llenguatges funcionals, Javascript, Rust, C\#...
-    \item \textbf{Result i Option}: Rust, Scala, Swift
-    \item \textbf{Immutabilitat}: Llenguatges funcionals, Rust, Swift
-    \item \textbf{Structs}: C, Go, Rust
-    \item \textbf{Pipes}: Elixir, F\#
-    \item \textbf{Referències}: C++, Rust, Go
-    \item \textbf{Sintaxi get, set}: C\#
-    \item \textbf{Expression-oriented}: Scala, Rust, Kotlin
+\item \textbf{List comprehension}: Python
+\item \textbf{Iteradors (map, reduce, ...)}: Llenguatges funcionals, Javascript, Rust, C\#...
+\item \textbf{Result i Option}: Rust, Scala, Haskell, Swift
+\item \textbf{Immutabilitat}: Llenguatges funcionals, Scala, Rust, Swift
+\item \textbf{Structs}: C, Go, Rust
+\item \textbf{Pipes}: Elixir, F\#
+\item \textbf{Referències}: C++, Rust, Go
+\item \textbf{Sintaxi get, set}: C\#
+\item \textbf{Expression-oriented}: Scala, Rust, Kotlin
 \end{enumerate}
+
+\subsection{Implementar el llenguatge}
+A l'hora d'implementar el compilador, hi ha dues fonts principals d'on treure'm
+informació detallada i força pràctica de com fer-ho.
+
+El primer de tots és un llibre anomenat \textit{Crafting Interpreters}
+\cite{crafting-interpreters}, el qual explica de forma detallada i amb exemples
+de codi, com escriure des de zero un llenguatge de programació creat per l'autor.
+El llibre es divideix en dues parts, una en Java, en el qual crear un intèrpret
+i l'altre amb C, en el qual crea un compilador amb màquina virtual. En el nostre cas,
+no en farem ni un ni l'altre, ja que serà un llenguatge que compilarà a codi
+màquina utilitzant LLVM. Però podem reutilitzar molts conceptes dels exposats,
+com ara com escriure un scanner o un parser, i patrons de disseny que són
+utils de cara al desenvolupament d'un compilador. Un altre llibre similar és
+\textit{Writing An Interpreter In Go} \cite{interpreterbook} i la seva
+continuació \textit{Writing A Compiler In Go} \cite{compilerbook}, tot i que
+ens basarem principalment en \textit{Crafting Interpreters}.
+
+El segon recurs va enfocat a la part de LLVM i generació de codi. Es tracta del
+tutorial oficial de LLVM, el qual detalla com fer un llenguatge senzill amb C++
+i LLVM. Igual que amb ell llibre de \textit{Crafting Interpreters}, també es
+descriu amb exemples de codi com crear un compilador des de zero.
+
+Donat que el nostre llenguatge serà implementat amb Rust, també ens serà útil
+el llibre \textit{The Rust Programming Language} \cite{rustbook}, conegut
+coloquialment com \textit{The Rust Book}. És el llibre oficial del llenguatge
+on s'explica amb detall com funciona el llenguatge i el perquè d'algunes
+decisions en el seu disseny.
+
+Finalment, també farem ús de la documentació de \textit{Inkwell} \cite{inkwell},
+la llibreria que ens permet fer servir LLVM des de Rust, així com la mateixa
+documentació de LLVM. Respecte a LLVM, també resultarà útil una pàgina web
+que s'anomena \textit{Mapping High Level Constructs to LLVM IR} \cite{mhlctllvm},
+la qual, com bé diu el seu nom, mostra exemples de com alguns conceptes d'alt
+nivell (en C/C++) es tradueixen a la representació intermèdia (IR) de LLVM.
+
+\section{Gramàtica}
+
+\begin{verbatim}
+<lowercase>     ::= "a" | ... | "z"
+<uppercase>     ::= "A" | ... | "Z"
+<letter>        ::= <lowercase> | <uppercase>
+<digit>         ::= "0" | ... | "9"
+
+<program>       ::= <fn> 
+                    | <method> 
+                    | <const> 
+                    | <global_var> 
+                    | <imports> 
+                    | <interface>
+
+<fn>            ::= <prototype> <block>
+<params>        ::= "(" { <param> { , <param> } } ")"
+<param>         ::= <id>: <type>
+<prototype>     ::= fn <id> "(" <params> ")" <type>
+
+<method>        ::= [pub] [mut] fn "(" <custom_type> ")" <id> "(" <params> ")" <type>
+                    <block>
+
+<block>         ::= "{" { <stmt> } [ <expr> ] "}"
+
+<type>          ::= i32 | i64 | f32 | f64 | bool | string | <custom_type> | <array>
+<custom_type>   ::= <uppercase> { ( <lowercase> | <digit> ) }
+<array>         ::= "[" <type> "]"
+
+<interface>     ::= interface <id> "{" { <prototype> ; } "}"
+
+<struct>        ::= struct <id> { <implements> } "{" 
+                        { <member_var> }
+                        { [pub] [static] <prototype> <block> }
+                    "}"
+
+<member_var>    ::= <id> : type [ "{" [get [, set]] | [set] "}" ];
+
+<implements>    ::= : <id> { , <id> }
+
+<stmt>          ::= <var> | <fn> | <for> | <while> | <for_in> | <expr_stmt>
+<var>           ::= let <id> : <type> = <expr>;
+<id>            ::= letter { letter | digit | "_" }
+
+<const>         ::= const <uppercase> { <uppercase> | <digit> } = <number> 
+                    | <string>
+                    | true
+                    | false ;
+<global_var>    ::= let <uppercase> { <uppercase> | <digit> } = <expr> ;
+
+<imports>       ::= { import <id>; }
+
+<expr>          ::= <eq>
+<eq>            ::= <comparison> { ( != | == ) <comparison> }
+<comparison>    ::= <term> { ( > | >= | < | <= ) <term> }
+<term>          ::= <factor> { ( - | + ) <factor> }
+<factor>        ::= <unary> { ( / | * ) <unary> }
+<unary>         ::= ( ! | - ) <unary> | <primary>
+
+<primary>       ::= <number> 
+                    | <string>
+                    | true
+                    | false
+                    | "(" <expr> ")" 
+                    | <id> ( <assign> |  <fn_call> | <pipe> )
+                    | <if_expr>
+                    | <clojure>
+
+<assign>        ::= "=" <expr>
+<fn_call>       ::= "(" { (<id> | <expr>) { , (<id> | <expr>) } } ")"
+<pipe>          ::= |> <id> { |> <id> }
+
+<if_expr>       ::= if <expr> <block> [ else ( <if_expr> | <block> ) ]
+<clojure>       ::= | <params> | -> <block>
+
+<for>           ::= [<break_tag>] for let <id> = <expr> ; <comparison> ; <expr>
+<while>         ::= while <expr> <block>
+<for_in>        ::= [<break_tag>] for <id> in <id> <block>
+<expr_stmt>     ::= <expr> ;
+
+<break_tag>     ::= <id>:
+\end{verbatim}
 
 \begin{thebibliography}{9}
 \bibitem{llvm_website} 
@@ -583,9 +768,22 @@ The LLVM Compiler Infrastructure, \url{https://llvm.org}
 
 \bibitem{inkwell} Inkwell, \url{https://github.com/TheDan64/inkwell}
 
+\bibitem{rust} The Rust Programming Language \url{https://www.rust-lang.org}
+
+\bibitem{rustbook} The Rust Programming Language \url{https://doc.rust-lang.org/book/}
+
 \bibitem{llvm_kaleidoscope} LLVM Kaleidoscope Tutorial: Implementing a Language with LLVM,\\ \url{https://llvm.org/docs/tutorial}
 
 \bibitem{crafting-interpreters}Crafting Interpreters, Bob Nystrom, \url{http://www.craftinginterpreters.com}
+
+\bibitem{interpreterbook}Writing An Interpreter In Go, Thorsten Ball, \url{https://interpreterbook.com}
+
+\bibitem{compilerbook}Writing A Compiler In Go, Thorsten Ball, \url{https://compilerbook.com}
+
+\bibitem{mhlctllvm} Mapping High Level Constructs to LLVM IR, \\
+\url{https://mapping-high-level-constructs-to-llvm-ir.readthedocs.io/en/latest/README.html}
+
+\bibitem{globals-haskell} Global variables, Haskell Wiki, \url{https://wiki.haskell.org/Global_variables}
 
 \end{thebibliography}
 \end{document}

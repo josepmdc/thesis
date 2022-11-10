@@ -98,8 +98,7 @@ A l'inici del treball, vam definir una sèrie de blocs de tasques que vam anomen
 d'esprints d'una setmana de durada), en el qual es desenvoluparien les tasques. 
 Si recordem les èpiques que es van definir eren les següents:
 
-\begin{enumerate}
-    \item \textbf{Implementació mínima de l'especificació}\\
+    \subsection{Implementació mínima de l'especificació}
         \textit{Completada: 13/09/2022 - 16/10/2022} (5 esprints)
 
         Aquesta èpica és la primera que es va completar i de la qual neixen la 
@@ -114,15 +113,14 @@ Si recordem les èpiques que es van definir eren les següents:
         El primer que es va fer va ser crear el projecte i un conjunt de funcions
         d'utilitat. El projecte es divideix principalment en 4 mòduls:
 
-        \begin{itemize}
-            \item  
-                \textbf{Mòdul principal}: S'encarrega de gestionar l'entrada de l'usuari
+            \subsubsection{Mòdul principal}
+            S'encarrega de gestionar l'entrada de l'usuari
                 (per exemple llegir l'arxiu a compilar) i crida a la resta de mòduls, passant
                 la  sortida d'un a l'entrada del següent. Bàsicament és el conductor de
                 la resta de mòduls.
 
-            \item
-                \textbf{Lexer}: Aquest mòdul s'encarrega de llegir la seqüència de
+            \subsubsection{Lexer}
+            Aquest mòdul s'encarrega de llegir la seqüència de
                 caràcters del codi a compilar i transformar-lo en un conjunt de
                 tokens. Principalment ens permet identificar els símbols del 
                 llenguatge i alertar a l'usuari en cas que n'estigui fent servir
@@ -165,8 +163,7 @@ Si recordem les èpiques que es van definir eren les següents:
                 nova el llenguatge o algun símbol nou i que per tant no reconeix
                 encara.
 
-            \item
-                \textbf{Parser}
+            \subsubsection{Parser}
 
                 El lexer ens ha permès identificar els símbols del programa, 
                 però no ens permet identificar si l'ordre és correcte o si segueix
@@ -194,21 +191,116 @@ Si recordem les èpiques que es van definir eren les següents:
                 tant, tornarà a cridar de forma recursiva la producció d'expressió.
 
                 Posem un exemple més il·lustratiu, amb una petita gramàtica, i com
-                aquesta s'implementaria en el parser.
+                aquesta s'implementaria en el parser. Aquesta seria la gramàtica
+                per generar el prototipus d'una funció (excloem el tipus de retorn
+                de la funció, que aniria després dels paràmetres, per simplificar):
 
                 \begin{verbatim}
 
+             <prototype>  ::= fn <id> "(" <params> ")"
+             <id>         ::= letter { letter | digit | "_" }
+             <params>     ::= "(" { <param> { , <param> } } ")"
+             <param>      ::= <id>: <type>
+
                 \end{verbatim}
 
-            \item
-                \textbf{Anàlisi semàntica i generació de codi}
+                La implementació d'aquesta gramàtica seria de la següent manera
+                (en un pseudocodi aproximat a Rust):
 
-        \end{itemize}
+                \begin{code}
+                fn parse_prototype() -> (Prototype, Err) {
+                    // we expect to find the fn keyword, else it's an error
+                    match current_token().kind {
+                        TokenKind::Fn => advance(),
+                        _ => return Err("Expected fn keyword"),
+                    };
+
+                    // we expect to find the function name, else it's an error
+                    let name = match current_token().kind {
+                        TokenKind::Identifier => current_token().lexeme,
+                        _ => return Err("Expected an identifier"),
+                    };
+
+                    advance();
+
+                    // we call the params rule
+                    let params = parse_params();
+
+                    // we are done, we return a struct with the info of the prototype
+                    return Prototype { 
+                        name,
+                        params,
+                    };
+                }
+                \end{code}
+
+                It's that simple, we go through all the tokens checking if the 
+                token we are looking at is the one we expected acording to the
+                grammar. And when we expect another rule, we just call another
+                function that implements that rule. In out exemple the 
+                \texttt{parse\_params} function:
+
+                \begin{code}
+                    fn parse_params() -> (Vec<Variable>, Err) {
+                        // params start with an opening paren
+                        match current_token().kind {
+                            TokenKind::LeftParen => advance(),
+                            _ => return Err("Expected left paren"),
+                        };
+
+                        // if we find a closing paren, then we are done (no params)
+                        if current_token().kind == TokenKind::RightParen {
+                            advance();
+                            return [];
+                        }
+
+                        let params = [];
+
+                        loop {
+                            // we expect an identifier for the param name
+                            let name = match current_token().kind {
+                                TokenKind::Identifier => current_token().lexeme,
+                                _ => return Err("Expected an identifier"),
+                            };
+
+                            advance();
+
+                            // a colon separates the identifier from the type
+                            match current_token().kind {
+                                TokenKind::Colon => advance(),
+                                _ => return Err("Expected ':' after identifier"),
+                            };
+
+                            // finally the type
+                            let type = match current_token().kind {
+                                TokenKind::Identifier => current_token().lexeme,
+                                _ => return Err("Expected an identifier"),
+                            };
+
+                            advance();
+
+                            // add it to the list of params
+                            params.push(Param { name, type });
+
+                            // if ')' we are done, if comma then there's another param
+                            match current_token().kind {
+                                TokenKind::RightParen => {
+                                    advance();
+                                    break;
+                                }
+                                TokenKind::Comma => advance(),
+                                _ => return Err("Expected right paren or comma"),
+                            }
+                        }
+                    }
+                \end{code}
+
+            \subsubsection{Anàlisi semàntica i generació de codi}
 
         Un cop construïda la base, afegir noves funcionalitats, és molt més fàcil.
 
 
-    \item \textbf{Declaració de tipus}\\
+    \subsection{Declaració de tipus}
         \textit{Completada: 17/10/2022 - 6/11/2022} (3 esprints)
         
         L'objectiu d'aquesta èpica era permetre a l'usuari definir tipus propis
@@ -266,23 +358,22 @@ Si recordem les èpiques que es van definir eren les següents:
             l'ordre en el qual es troben.
        \end{itemize}
 
-    \item \textbf{Collections}\\
+    \subsection{Collections}
         \textit{En progrés: 31/10/2022 - 20/11/2022*} (3 esprints)
 
         Implementació d'arrays estàtics, arrays dinàmics i tuples.
 
-    \item \textbf{Mecanisme de gestió d'errors}\\
+    \subsection{Mecanisme de gestió d'errors}
         Implementar un mecanisme per tal de gestionar errors en temps d'execució.
 
-    \item \textbf{Syntactic sugar}\\
+    \subsection{Syntactic sugar}
         Implementació de "Syntactic sugar", per tal de simplificar operacions
         que s'utilitzen freqüentment. Inclou bucles for in, match (similar a un
         switch), list comprehension, etc.
 
-    \item \textbf{Suport per programació d'estil funcional}\\
-        Afegir suport per programació d'estil funcional, integrant funcions com
-        ara map, reduce, fold, etc.
-\end{enumerate}
+\subsection{Suport per programació d'estil funcional}
+Afegir suport per programació d'estil funcional, integrant funcions com ara map,
+reduce, fold, etc.
 
 \section{Passos a seguir}
 

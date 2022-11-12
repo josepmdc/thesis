@@ -27,13 +27,14 @@
 
 \graphicspath{ {images/} }
 
-\lstnewenvironment{code}[1][]%
-{
+\lstnewenvironment{code}[1][]{
    \noindent
-   \minipage{\linewidth} 
-   \vspace{0.5\baselineskip}
-   \lstset{language=Rust, style=colouredRust,#1}}
-{\endminipage}
+   \lstset{
+        language=Rust,
+        style=colouredRust,
+        inputencoding=latin1
+    }
+}{}
 
 \begin{document}
 \begin{titlepage}
@@ -92,284 +93,319 @@
 % --------------------------------------
 % Body
 % --------------------------------------
+\section{Metodologia}
+Per tal d'organitzar el projecte es va optar per una metodologia Agile/Scrum
+però adaptada per a una sola persona. Principalment consisteix en crear esprints
+d'una setmana. Un esprint és simplement un bloc de temps (una setmana en el
+nostre cas) en el que s'han de completar un seguit de tasques. Les tasques han
+de ser petites per tal d'oferir la màxima flexibilitat i s'agrupen en èpiques.
+Les èpiques ens indiquen una funcionalitat que ha de tenir el llenguatge, i totes
+les tasques que la conformen són les tasques necessàries per poder desenvolupar
+aquesta funcionalitat.
+
+\subsection{Eines}
+Tot i ser un projecte de no gran envergadura, i format només per una persona,
+és difícil organitzar-se sense fer ús de cap eina. És per això que s'han 
+utilitzat principalment dues eines: una per gestionar les tasques i els terminis,
+i un altre per gestionar el control de versions del codi font.
+
+\subsubsection{Gestió de les tasques}
+Per crear i gestionar les tasques s'ha estat fent servir Jira, com vam comentar
+en el primer informe. Es va triar aquesta eina, ja que l'he fet servir 
+prèviament en projectes professionals i ja la tenia per mà. Permet creaer tasques
+i assignarles a esprints, a mes de crear un roadmap amb les èpiques, mostrant de
+manera gràfica quan inicien i quan han d'acabar. També té moltes funcions de 
+metriques, tot i que no es faran servir en aquest projecte.
+
+En el temps que ha transcorregut des de l'inici, està funcionant realment bé, i 
+ajuda bastant en l'organització.
+
+\subsubsection{Control de versions del codi font}
+L'altra eina important és el control de versions. És imprescindible, des del meu
+punt de vista, si has de col·laborar amb més gent, però també, en projectes com
+aquest que són individuals. Et permet estar al cas de tots els canvis que has
+fet en el projecte, i en casos que trobis un bug, és molt més fàcil tirar enrere
+en el temps per trobar on va aparèixer per primer cop.
+
+De totes les eines de control de versions, s'està fent servir Git, ja que és
+l'estàndard en el desenvolupament del software i és amb la que estic més 
+familiaritzat. També s'està fent servir GitHub per allotjar el repositori, ja 
+que ofereix moltes funcionalitats i a més és on es troben la gran majoria de
+projectes de codi obert i disposa d'una gran comunitat.
+
 \section{Seguiment de la planificació}
-A l'inici del treball, vam definir una sèrie de blocs de tasques que vam anomenar
-èpiques, i cada una d'aquestes èpiques tenia un bloc de temps assignat (una sèrie
-d'esprints d'una setmana de durada), en el qual es desenvoluparien les tasques. 
-Si recordem les èpiques que es van definir eren les següents:
 
-    \subsection{Implementació mínima de l'especificació}
-        \textit{Completada: 13/09/2022 - 16/10/2022} (5 esprints)
+Si recordem, a l'inici del treball vam definir quines eren les èpiques que
+conformarien el projecte i en quin moment es desenvoluparien. A hores d'ara
+aquestes èpiques segueixen més o menys com s'havien plantejat al seu moment,
+però amb algun canvi pel que fa al moment en el qual s'han desenvolupat (alguna
+ha durant més de l'esperat). També s'ha creat una nova èpica per albergar tots
+els bugs i tasques de manteniment i millora del projecte que van apareixent a
+mesura que va avançant. 
 
-        Aquesta èpica és la primera que es va completar i de la qual neixen la 
-        resta. Consistia en la creació d'una base sòlida del llenguatge que 
-        permetés crear programes simples amb operacions numèriques i control
-        de flux.
+A continuació mirarem aquestes èpiques, una per una, per veure quin és el seu
+estat, i, per les que ja s'han completat, donar una mica més de detall de què
+han aportat al projecte i com s'han desenvolupat a un nivell més tècnic.
 
-        Aquesta èpica és la més llarga de totes, ja que requereix molta feina
-        inicial. Va acabar una setmana més tard del previst, però tot i això no
-        ha tingut gaire afectació al conjunt del projecte.
 
-        El primer que es va fer va ser crear el projecte i un conjunt de funcions
-        d'utilitat. El projecte es divideix principalment en 4 mòduls:
+\subsection{Implementació mínima de l'especificació}
+\textit{\textbf{Completada}: 13/09/2022 - 16/10/2022} (5 esprints)
 
-            \subsubsection{Mòdul principal}
-            S'encarrega de gestionar l'entrada de l'usuari
-                (per exemple llegir l'arxiu a compilar) i crida a la resta de mòduls, passant
-                la  sortida d'un a l'entrada del següent. Bàsicament és el conductor de
-                la resta de mòduls.
+Aquesta èpica és la primera que es va completar i de la qual neixen la resta.
+Consistia en la creació d'una base sòlida del llenguatge que permetés crear
+programes simples amb operacions numèriques i control de flux.
 
-            \subsubsection{Lexer}
-            Aquest mòdul s'encarrega de llegir la seqüència de
-                caràcters del codi a compilar i transformar-lo en un conjunt de
-                tokens. Principalment ens permet identificar els símbols del 
-                llenguatge i alertar a l'usuari en cas que n'estigui fent servir
-                algun que no és vàlid. La manera com funciona és la següent:
+Aquesta èpica és la més llarga de totes, ja que requereix molta feina inicial.
+Va acabar una setmana més tard del previst, però tot i això no ha tingut gaire
+afectació al conjunt del projecte.
 
-                Mentre que no hàgim arribat al final de la seqüència de caràcters,
-                processem el següent caràcter en la seqüència. 
+El primer que es va fer va ser crear el projecte i un conjunt de funcions
+d'utilitat. El projecte es divideix principalment en 4 mòduls:
 
-                Si és un parèntesi, per exemple, com que per si sol forma una 
-                seqüència vàlida, i no pot generar-ne cap altre, creem un nou 
-                token de tipus parèntesis i l'afegim al conjunt de sortida. Si 
-                per contra ens trobéssim un caràcter tipus '>', no podem crear 
-                un token encara, ja que depenent del següent caràcter, podria ser
-                un '>=' o bé un '>'. Per tant, escanegem també el següent caràcter
-                i en funció d'això creem el token. 
+\subsubsection{Mòdul principal}
+S'encarrega de gestionar l'entrada de l'usuari (per exemple llegir l'arxiu a
+compilar) i crida a la resta de mòduls, passant la  sortida d'un a l'entrada del
+següent. Bàsicament és el conductor de la resta de mòduls.
 
-                Un cas particular que poder cal destacar, és quan ens trobem amb
-                un caràcter alfanumèric, ja que hem de tenir en compte més coses:
-                
-                \begin{itemize}
-                \item
-                    Si és un dígit, vol dir que estem processant un nombre, i per tant 
-                    hem d'anar avançant mentre ens anem trobant dígits. Mentre processem
-                    els dígits pot ser que ens trobem una coma, el que ens indicarà
-                    que és un nombre real i per tant generarem un token de float. Si,
-                    no té coma en canvi, generem un token d'int.
-                \item
-                    Si en canvi és un caràcter alfabètic, haurem d'anar avançant
-                    mentre que ens trobem caràcters alfanumèrics (no es permeten 
-                    dígits a l'inici d'un identificador però si a la meitat) o 
-                    guions baixos. Un cop troben un altre tipus de caràcter, vol
-                    dir que ja hem acabat i podem crear el token. Ara bé, aquest
-                    token pot ser un identificador o una paraula reservada del
-                    llenguatge, per tant, hem de comprovar si és una paraula
-                    reservada i crear un token o l'altre en funció d'això.
-                \end{itemize}
+\subsubsection{Lexer}
+Aquest mòdul s'encarrega de llegir la seqüència de caràcters del codi a compilar
+i transformar-lo en un conjunt de tokens. Principalment ens permet identificar
+els símbols del llenguatge i alertar a l'usuari en cas que n'estigui fent servir
+algun que no és vàlid. La manera com funciona és la següent:
 
-                En general el lexer, un cop fet no s'haurà de modificar gaire,
-                només caldrà modificar-lo si hem d'afegir alguna paraula reservada
-                nova el llenguatge o algun símbol nou i que per tant no reconeix
-                encara.
+Mentre que no hàgim arribat al final de la seqüència de caràcters, processem el
+següent caràcter en la seqüència. 
 
-            \subsubsection{Parser}
+Si és un parèntesi, per exemple, com que per si sol forma una seqüència vàlida,
+i no pot generar-ne cap altre, creem un nou token de tipus parèntesis i l'afegim
+al conjunt de sortida. Si per contra ens trobéssim un caràcter tipus '>', no
+podem crear un token encara, ja que depenent del següent caràcter, podria ser un
+'>=' o bé un '>'. Per tant, escanegem també el següent caràcter i en funció
+d'això creem el token. 
 
-                El lexer ens ha permès identificar els símbols del programa, 
-                però no ens permet identificar si l'ordre és correcte o si segueix
-                les normes del llenguatge (és a dir si és gramaticalment correcte).
-                Aquesta és la funció del parser, el qual a partir de la seqüència 
-                de tokens, n'extraurà el significat i generarà un arbre sintàctic,
-                el qual ens indica com haurem d'executar les instruccions.
+Un cas particular que poder cal destacar, és quan ens trobem amb
+un caràcter alfanumèric, ja que hem de tenir en compte més coses:
 
-                La funció del parser és fer complir la gramàtica del llenguatge.
-                S'ha implementat en la forma d'un \textit{recursive descent parser}
-                el qual és pràcticament una traducció literal de la gramàtica en
-                forma de codi.
+\begin{itemize}
+\item
+    Si és un dígit, vol dir que estem processant un nombre, i per tant hem
+    d'anar avançant mentre ens anem trobant dígits. Mentre processem els dígits
+    pot ser que ens trobem una coma, el que ens indicarà que és un nombre real i
+    per tant generarem un token de float. Si, no té coma en canvi, generem un
+    token d'int.
+\item
+    Si en canvi és un caràcter alfabètic, haurem d'anar avançant mentre que ens
+    trobem caràcters alfanumèrics (no es permeten dígits a l'inici d'un
+    identificador però si a la meitat) o guions baixos. Un cop troben un altre
+    tipus de caràcter, vol dir que ja hem acabat i podem crear el token. Ara bé,
+    aquest token pot ser un identificador o una paraula reservada del
+    llenguatge, per tant, hem de comprovar si és una paraula reservada i crear
+    un token o l'altre en funció d'això.
+\end{itemize}
 
-                El que fa el parser és començar pel primer token de la seqüència
-                que ens ha generat el lexer. A partir d'allà va descendint de 
-                forma recursiva per totes les produccions de la gramàtica. Per
-                exemple, si el primer token és 'fn', el parser començarà a 
-                explorar la producció que genera una funció. Mirarà que seguidament
-                de 'fn' hi hagi un identificar. Si no hi és, es retorna un error
-                a l'usuari. Si hi és, aleshores segueix descendint, mira que 
-                s'especifiquin correctament els paràmetres, si hi són, el valor
-                de retorn i finalment el cos de la funció. Diem que és recursiu
-                perquè pot ser que mentre estem generant, per exemple una expressió,
-                pot ser que aquesta estigui formada per altres expressions, i per
-                tant, tornarà a cridar de forma recursiva la producció d'expressió.
+En general el lexer, un cop fet no s'haurà de modificar gaire, només caldrà
+modificar-lo si hem d'afegir alguna paraula reservada nova el llenguatge o algun
+símbol nou i que per tant no reconeix encara.
 
-                Posem un exemple més il·lustratiu, amb una petita gramàtica, i com
-                aquesta s'implementaria en el parser. Aquesta seria la gramàtica
-                per generar el prototipus d'una funció (excloem el tipus de retorn
-                de la funció, que aniria després dels paràmetres, per simplificar):
+\subsubsection{Parser}
 
-                \begin{verbatim}
+El lexer ens ha permès identificar els símbols del programa, però no ens permet
+identificar si l'ordre és correcte o si segueix les normes del llenguatge (és a
+dir si és gramaticalment correcte). Aquesta és la funció del parser, el qual a
+partir de la seqüència de tokens, n'extraurà el significat i generarà un arbre
+sintàctic, el qual ens indica com haurem d'executar les instruccions.
 
-             <prototype>  ::= fn <id> "(" <params> ")"
-             <id>         ::= letter { letter | digit | "_" }
-             <params>     ::= "(" { <param> { , <param> } } ")"
-             <param>      ::= <id>: <type>
+La funció del parser és fer complir la gramàtica del llenguatge. S'ha
+implementat en la forma d'un \textit{recursive descent parser} el qual és
+pràcticament una traducció literal de la gramàtica en forma de codi.
 
-                \end{verbatim}
+El que fa el parser és començar pel primer token de la seqüència que ens ha
+generat el lexer. A partir d'allà va descendint de forma recursiva per totes les
+produccions de la gramàtica. Per exemple, si el primer token és 'fn', el parser
+començarà a explorar la producció que genera una funció. Mirarà que seguidament
+de 'fn' hi hagi un identificar. Si no hi és, es retorna un error a l'usuari. Si
+hi és, aleshores segueix descendint, mira que s'especifiquin correctament els
+paràmetres, si hi són, el valor de retorn i finalment el cos de la funció. Diem
+que és recursiu perquè pot ser que mentre estem generant, per exemple una
+expressió, pot ser que aquesta estigui formada per altres expressions, i per
+tant, tornarà a cridar de forma recursiva la producció d'expressió.
 
-                La implementació d'aquesta gramàtica seria de la següent manera
-                (en un pseudocodi aproximat a Rust):
+Posem un exemple més il·lustratiu, amb una petita gramàtica, i com aquesta
+s'implementaria en el parser. Aquesta seria la gramàtica per generar el
+prototipus d'una funció (excloem el tipus de retorn de la funció, que aniria
+després dels paràmetres, per simplificar):
 
-                \begin{code}
-                fn parse_prototype() -> (Prototype, Err) {
-                    // we expect to find the fn keyword, else it's an error
-                    match current_token().kind {
-                        TokenKind::Fn => advance(),
-                        _ => return Err("Expected fn keyword"),
-                    };
+\begin{verbatim}
+<prototype>  ::= fn <id> "(" <params> ")"
+<id>         ::= letter { letter | digit | "_" }
+<params>     ::= "(" { <param> { , <param> } } ")"
+<param>      ::= <id>: <type>
+\end{verbatim}
 
-                    // we expect to find the function name, else it's an error
-                    let name = match current_token().kind {
-                        TokenKind::Identifier => current_token().lexeme,
-                        _ => return Err("Expected an identifier"),
-                    };
+La implementació d'aquesta gramàtica seria de la següent manera (en un
+pseudocodi aproximat a Rust):
 
+\begin{code}
+fn parse_prototype() -> (Prototype, Err) {
+    // we expect to find the fn keyword, else it's an error
+    match current_token().kind {
+        // The advance function moves to the next token
+        TokenKind::Fn => advance(),
+        _ => return Err("Expected fn keyword"),
+    };
+
+    // we expect to find the function name, else it's an error
+    let name = match current_token().kind {
+        TokenKind::Identifier => current_token().lexeme,
+        _ => return Err("Expected an identifier"),
+    };
+
+    advance();
+
+    // we call the params rule
+    let params = parse_params();
+
+    // we are done, we return a struct with the info of the prototype
+    return Prototype { 
+        name,
+        params,
+    };
+}
+\end{code}
+
+És així de simple, iterem els tokens un per un i comprovem que el token que
+estem revisant sigui el token que esperem trobar, en funció del que ens diu la
+gramàtica. I quan el que esperen és una altra producció, simplement cridem a la
+funció que implementa aquesta producció. En el nostre exemple la funció
+\texttt{parse\_params}:
+
+\begin{code}
+    fn parse_params() -> (Vec<Variable>, Err) {
+        // params start with an opening paren, else it's an error
+        match current_token().kind {
+            TokenKind::LeftParen => advance(),
+            _ => return Err("Expected left paren"),
+        };
+
+        // if we find a closing paren, then we are done (no params)
+        if current_token().kind == TokenKind::RightParen {
+            advance();
+            return [];
+        }
+
+        let params = [];
+
+        loop {
+            // we expect an identifier for the param name
+            let name = match current_token().kind {
+                TokenKind::Identifier => current_token().lexeme,
+                _ => return Err("Expected an identifier"),
+            };
+
+            advance();
+
+            // a colon separates the identifier from the type
+            match current_token().kind {
+                TokenKind::Colon => advance(),
+                _ => return Err("Expected ':' after identifier"),
+            };
+
+            // finally the type
+            let type = match current_token().kind {
+                TokenKind::Identifier => current_token().lexeme,
+                _ => return Err("Expected an identifier"),
+            };
+
+            // add it to the list of params
+            params.push(Param { name, type });
+
+            advance();
+
+            match current_token().kind {
+                // if it's a ')' we are done and we break from the loop
+                TokenKind::RightParen => {
                     advance();
-
-                    // we call the params rule
-                    let params = parse_params();
-
-                    // we are done, we return a struct with the info of the prototype
-                    return Prototype { 
-                        name,
-                        params,
-                    };
+                    break;
                 }
-                \end{code}
+                // if it's a ',' then there's another param
+                TokenKind::Comma => advance(),
+                // else it's an error
+                _ => return Err("Expected right paren or comma"),
+            }
+        }
+    }
+\end{code}
 
-                It's that simple, we go through all the tokens checking if the 
-                token we are looking at is the one we expected acording to the
-                grammar. And when we expect another rule, we just call another
-                function that implements that rule. In out exemple the 
-                \texttt{parse\_params} function:
+\subsubsection{Anàlisi semàntica i generació de codi}
 
-                \begin{code}
-                    fn parse_params() -> (Vec<Variable>, Err) {
-                        // params start with an opening paren
-                        match current_token().kind {
-                            TokenKind::LeftParen => advance(),
-                            _ => return Err("Expected left paren"),
-                        };
-
-                        // if we find a closing paren, then we are done (no params)
-                        if current_token().kind == TokenKind::RightParen {
-                            advance();
-                            return [];
-                        }
-
-                        let params = [];
-
-                        loop {
-                            // we expect an identifier for the param name
-                            let name = match current_token().kind {
-                                TokenKind::Identifier => current_token().lexeme,
-                                _ => return Err("Expected an identifier"),
-                            };
-
-                            advance();
-
-                            // a colon separates the identifier from the type
-                            match current_token().kind {
-                                TokenKind::Colon => advance(),
-                                _ => return Err("Expected ':' after identifier"),
-                            };
-
-                            // finally the type
-                            let type = match current_token().kind {
-                                TokenKind::Identifier => current_token().lexeme,
-                                _ => return Err("Expected an identifier"),
-                            };
-
-                            advance();
-
-                            // add it to the list of params
-                            params.push(Param { name, type });
-
-                            // if ')' we are done, if comma then there's another param
-                            match current_token().kind {
-                                TokenKind::RightParen => {
-                                    advance();
-                                    break;
-                                }
-                                TokenKind::Comma => advance(),
-                                _ => return Err("Expected right paren or comma"),
-                            }
-                        }
-                    }
-                \end{code}
-
-            \subsubsection{Anàlisi semàntica i generació de codi}
-
-        Un cop construïda la base, afegir noves funcionalitats, és molt més fàcil.
+Un cop construïda la base, afegir noves funcionalitats, és molt més fàcil.
 
 
-    \subsection{Declaració de tipus}
-        \textit{Completada: 17/10/2022 - 6/11/2022} (3 esprints)
-        
-        L'objectiu d'aquesta èpica era permetre a l'usuari definir tipus propis
-        a part dels que venen per defecte en el llenguatge. Aquest objectiu s'ha
-        traduït en la implementació de structs dins del llenguatge, el qual permet
-        definir conjunts de dades de forma estructurada. Funcionen igual que els
-        structs de C, per exemple. La intenció es afegir mètodes als structs, per
-        així poder dotar-los de funcionalitat, similar a les classes d'altres
-        llenguatges, però això es farà més endavant si dona temps, ja que no és
-        una funcionalitat imprescindible, donat que es pot obtenir un funcionament
-        similar al dels mètodes, passant els structs com a paràmetre a les funcions.
+\subsection{Declaració de tipus}
+\textit{\textbf{Completada}: 17/10/2022 - 6/11/2022} (3 esprints)
 
-        Implementar els structs, com la gran majoria de noves funcionalitats
-        afegides al llenguatge implica modificar el lexer, el parser i la 
-        generació de codi. 
+L'objectiu d'aquesta èpica era permetre a l'usuari definir tipus propis a part
+dels que venen per defecte en el llenguatge. Aquest objectiu s'ha traduït en la
+implementació de structs dins del llenguatge, el qual permet definir conjunts de
+dades de forma estructurada. Funcionen igual que els structs de C, per exemple.
+La intenció es afegir mètodes als structs, per així poder dotar-los de
+funcionalitat, similar a les classes d'altres llenguatges, però això es farà més
+endavant si dona temps, ja que no és una funcionalitat imprescindible, donat que
+es pot obtenir un funcionament similar al dels mètodes, passant els structs com
+a paràmetre a les funcions.
 
-        En quant al lexer no implica gaires complicacions. 
-        Simplement afegim una nova paraula clau ("struct") i també perque detecti
-        els punts com a caràcter vàlid, ja que per accedir al camp d'un struct
-        fem \texttt{struct.camp}.
+Implementar els structs, com la gran majoria de noves funcionalitats afegides al
+llenguatge implica modificar el lexer, el parser i la generació de codi. 
 
-        Ampliar el parser, requereix una mica més de feina, però no difereix 
-        gaire del que hem fet fins ara. Hem d'implementar en el parser les 
-        produccions per a la definició de structs, per la instanciació i 
-        per l'accés als camps.
+En quant al lexer no implica gaires complicacions. Simplement afegim una nova
+paraula clau ("struct") i també perque detecti els punts com a caràcter vàlid,
+ja que per accedir al camp d'un struct fem \texttt{struct.camp}.
 
-       La part més complexa és la de generació de codi, ja que hem de tenir en
-       compte la distribució de les dades en la memòria. Donat que podem tenir
-       tres tipus diferents d'interaccions amb els structs els analitzarem per 
-       separat.
+Ampliar el parser, requereix una mica més de feina, però no difereix gaire del
+que hem fet fins ara. Hem d'implementar en el parser les produccions per a la
+definició de structs, per la instanciació i per l'accés als camps.
 
-       \begin{itemize}
-        \item \textbf{Definició}: Els structs en LLVM són simplement un conjunt
-            de dades de diferents tipus una rere l'altre. Per exemple, el struct:
+La part més complexa és la de generació de codi, ja que hem de tenir en compte
+la distribució de les dades en la memòria. Donat que podem tenir tres tipus
+diferents d'interaccions amb els structs els analitzarem per separat.
 
-            \begin{code}
-                struct {
-                    first: i64
-                    second: f64
-                }
-            \end{code}
+\begin{itemize}
+\item \textbf{Definició}: Els structs en LLVM són simplement un conjunt
+    de dades de diferents tipus una rere l'altre. Per exemple, el struct:
 
-            es representa de la següent manera:
+    \begin{code}
+        struct {
+            first: i64
+            second: f64
+        }
+    \end{code}
 
-            \begin{code}
-                struct { i64, f64 }
-            \end{code}
+    es representa de la següent manera:
 
-            Només indiquem els tipus dels camps i en quin ordre van, però no hi
-            ha cap identificador. Per aquest motiu, es responsabilitat nostra,
-            comprovar coses com ara que un camp no estigui duplicat, o saber en
-            quina posició del struct es troba la dada que ens demana l'usuari a
-            través de l'identificador. Per tant, durant el procés de compilació
-            hem de guardar totes les definicions dels structs, els seus camps, i
-            l'ordre en el qual es troben.
-       \end{itemize}
+    \begin{code}
+        struct { i64, f64 }
+    \end{code}
 
-    \subsection{Collections}
-        \textit{En progrés: 31/10/2022 - 20/11/2022*} (3 esprints)
+    Només indiquem els tipus dels camps i en quin ordre van, però no hi ha cap
+    identificador. Per aquest motiu, es responsabilitat nostra, comprovar coses
+    com ara que un camp no estigui duplicat, o saber en quina posició del struct
+    es troba la dada que ens demana l'usuari a través de l'identificador. Per
+    tant, durant el procés de compilació hem de guardar totes les definicions
+    dels structs, els seus camps, i l'ordre en el qual es troben.
+\end{itemize}
 
-        Implementació d'arrays estàtics, arrays dinàmics i tuples.
+\subsection{Collections}
+\textit{\textbf{En progrés}: 31/10/2022 - 20/11/2022*} (3 esprints)
 
-    \subsection{Mecanisme de gestió d'errors}
-        Implementar un mecanisme per tal de gestionar errors en temps d'execució.
+Implementació d'arrays estàtics, arrays dinàmics i tuples.
 
-    \subsection{Syntactic sugar}
-        Implementació de "Syntactic sugar", per tal de simplificar operacions
-        que s'utilitzen freqüentment. Inclou bucles for in, match (similar a un
-        switch), list comprehension, etc.
+\subsection{Mecanisme de gestió d'errors}
+Implementar un mecanisme per tal de gestionar errors en temps d'execució.
+
+\subsection{Syntactic sugar}
+Implementació de "Syntactic sugar", per tal de simplificar operacions que
+s'utilitzen freqüentment. Inclou bucles for in, match (similar a un switch),
+list comprehension, etc.
 
 \subsection{Suport per programació d'estil funcional}
 Afegir suport per programació d'estil funcional, integrant funcions com ara map,

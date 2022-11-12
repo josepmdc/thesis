@@ -95,37 +95,37 @@
 % --------------------------------------
 \section{Metodologia}
 Per tal d'organitzar el projecte es va optar per una metodologia Agile/Scrum
-però adaptada per a una sola persona. Principalment consisteix en crear esprints
+però adaptada per a una sola persona. Principalment consisteix a crear esprints
 d'una setmana. Un esprint és simplement un bloc de temps (una setmana en el
 nostre cas) en el que s'han de completar un seguit de tasques. Les tasques han
 de ser petites per tal d'oferir la màxima flexibilitat i s'agrupen en èpiques.
-Les èpiques ens indiquen una funcionalitat que ha de tenir el llenguatge, i totes
-les tasques que la conformen són les tasques necessàries per poder desenvolupar
-aquesta funcionalitat.
+Les èpiques ens indiquen una funcionalitat que ha de tenir el llenguatge, i
+totes les tasques que la conformen són les tasques necessàries per poder
+desenvolupar aquesta funcionalitat.
 
 \subsection{Eines}
-Tot i ser un projecte de no gran envergadura, i format només per una persona,
-és difícil organitzar-se sense fer ús de cap eina. És per això que s'han 
-utilitzat principalment dues eines: una per gestionar les tasques i els terminis,
-i un altre per gestionar el control de versions del codi font.
+Tot i ser un projecte de no gran envergadura, i format només per una persona, és
+difícil organitzar-se sense fer ús de cap eina. És per això que s'han utilitzat
+principalment dues eines: una per gestionar les tasques i els terminis, i un
+altre per gestionar el control de versions del codi font.
 
-\subsubsection{Gestió de les tasques}
-Per crear i gestionar les tasques s'ha estat fent servir Jira, com vam comentar
-en el primer informe. Es va triar aquesta eina, ja que l'he fet servir 
-prèviament en projectes professionals i ja la tenia per mà. Permet creaer tasques
-i assignarles a esprints, a mes de crear un roadmap amb les èpiques, mostrant de
-manera gràfica quan inicien i quan han d'acabar. També té moltes funcions de 
-metriques, tot i que no es faran servir en aquest projecte.
+\subsubsection{Gestió de les tasques} Per crear i gestionar les tasques s'ha
+estat fent servir Jira, com vam comentar en el primer informe. Es va triar
+aquesta eina, ja que l'he fet servir prèviament en projectes professionals i ja
+la tenia per mà. Permet crear tasques i assignar-les a esprints, a més de crear
+un roadmap amb les èpiques, mostrant de manera gràfica quan inicien i quan han
+d'acabar. També té moltes funcions de mètriques, tot i que no es faran servir en
+aquest projecte.
 
-En el temps que ha transcorregut des de l'inici, està funcionant realment bé, i 
+En el temps que ha transcorregut des de l'inici, està funcionant realment bé, i
 ajuda bastant en l'organització.
 
-\subsubsection{Control de versions del codi font}
-L'altra eina important és el control de versions. És imprescindible, des del meu
-punt de vista, si has de col·laborar amb més gent, però també, en projectes com
-aquest que són individuals. Et permet estar al cas de tots els canvis que has
-fet en el projecte, i en casos que trobis un bug, és molt més fàcil tirar enrere
-en el temps per trobar on va aparèixer per primer cop.
+\subsubsection{Control de versions del codi font} L'altra eina important és el
+control de versions. És imprescindible, des del meu punt de vista, si has de
+col·laborar amb més gent, però també, en projectes com aquest que són
+individuals. Et permet estar al cas de tots els canvis que has fet en el
+projecte, i en casos que trobis un bug, és molt més fàcil tirar enrere en el
+temps per trobar on va aparèixer per primer cop.
 
 De totes les eines de control de versions, s'està fent servir Git, ja que és
 l'estàndard en el desenvolupament del software i és amb la que estic més 
@@ -139,7 +139,7 @@ Si recordem, a l'inici del treball vam definir quines eren les èpiques que
 conformarien el projecte i en quin moment es desenvoluparien. A hores d'ara
 aquestes èpiques segueixen més o menys com s'havien plantejat al seu moment,
 però amb algun canvi pel que fa al moment en el qual s'han desenvolupat (alguna
-ha durant més de l'esperat). També s'ha creat una nova èpica per albergar tots
+ha durat més de l'esperat). També s'ha creat una nova èpica per albergar tots
 els bugs i tasques de manteniment i millora del projecte que van apareixent a
 mesura que va avançant. 
 
@@ -337,8 +337,43 @@ funció que implementa aquesta producció. En el nostre exemple la funció
 \end{code}
 
 \subsubsection{Anàlisi semàntica i generació de codi}
+En la definició del projecte vam comentar que fariem servir LLVM. Ara entrarem
+en una mica més de detall per veure que és LLVM, com funciona i com ha estat
+incorporat al projecte per tal de generar el codi.
 
-Un cop construïda la base, afegir noves funcionalitats, és molt més fàcil.
+LLVM va ser creat el 2003 per Chris Lattner (també creador del llenguatge de
+programació Swift) i disposa del suport d'empreses com Apple (LLVM és una part
+integral de XCode i de Swift per al desenvolupament d'aplicacions iOS), Google,
+IBM o Intel. Actualment hi ha diversos dels principals llenguatges de
+programació que en fan ús com ara C/C++ (a través del compilador Clang, una
+alternativa a GCC), Rust o Swift.
+
+LLVM és un toolchain per crear compiladors, és a dir que té moltes eines diferents
+que ens ajuden en la implementació de compiladors, però principalment, i el que
+ens interessa a nosaltres, és un back end (de fet n'és molts a la vegada com ja
+veurem). Un back end és la part del compilador que genera assemblador per alguna
+arquitectura en concret a partir d'una representació intermèdia. Ara bé, en el
+cas de LLVM, no genera assemblador per una arquitectura en concret, sino que en
+genera per pràcticament totes les arquitectures disponibles actualment.
+D'aquesta manera, tu, com a creador de llenguatges de programació, només t'has
+de preocupar de generar la representació intermèdia de LLVM. A partir d'aquí hi
+aplicarà optimitzacions i generarà l'assemblador de l'arquitectura que l'hi
+indiquis. Fins i tot pot generar Web Assembly, cosa que ens permet executar el
+llenguatge en navegadors web moderns.
+
+Donat que LLVM és independent de l'arquitectura, quan generem el codi, no ens
+hem de preocupar del nombre de registres, ja que disposen d'un nombre il·limitat
+de registres virtuals, els quals LLVM mapejarà posteriorment als registres de
+l'arquitectura corresponent.
+
+Com hem comentat, LLVM també aplica optimitzacions al codi generat, com pot ser
+eliminar codi que no es fa servir o avaluar expressions que es poden saber en
+temps de compilació. Ara bé, perquè LLVM pugui fer aquestes optimitzacions, 
+nosaltres haurem de generar el codi en SSA (Static single-assignment), el que vol
+dir que només podem assignar valor a una variable una vegada. Si necessitem 
+reassignar un valor, hem de crear una nova variable que la substitueixi. Això es
+fa simplement perquè facilita molt a l'hora d'aplicar optimitzacions.
+
 
 
 \subsection{Declaració de tipus}

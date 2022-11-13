@@ -467,9 +467,54 @@ contindrà l'estat de la compilació.
 
 Finalment tenim la classe \texttt{Builder}, que és la que s'encarrega de generar
 el codi com a tal, i al que, per tant, anirem cridant cada com que vulguem
-generar una instrucció.
+generar una instrucció. Per exemle si volem construir la comparació del if de la
+funció \texttt{max} anterior, ho fariem així: 
+
+\texttt{Builder.CreateICmpSGT(a, b, "nom")}
+
+I això ens generarà el següent codi (línia 3 de l'exemple complet que hem vist 
+en l'apartat anterior):
+
+\texttt{\%nom = icmp sgt i32 \%a, \%b}
+
+El tercer paràmetre indica el nom de la variable generada, tot i això, només 
+serveix perquè, a l'hora de debugar, ens sigui més fàcil trobar-ho.
 
 \subsubsection{Anàlisi semàntica}
+Un pas addicional que hem de fer és l'anàlisi semàntica, per així assegurar que
+el codi que estem compilant és correcte, comprovant coses com que en una suma,
+els dos valors siguin de tipus compatibles i que es puguin sumar. Aquesta
+anàlisi es fa en el pas de la generació de codi, ja que estan molt lligats. Per
+exemple, en el cas de la suma que hem comentat, en generar el codi, ens adonarem
+que els dos tipus que estem sumant no són compatibles, ja que no podrem generar
+un codi vàlid.
+
+\subsubsection{Què ens ha aportat aquesta èpica?}
+Un cop finalitzada aquesta èpica ja tenim un llenguatge mínim que pot fer coses
+senzilles amb expressions numèriques. També tenim operacions de control de flux
+en forma de if i while. Per exemple, el següent programa ja funcionaria:
+
+\begin{code}
+fn fib(n) {
+    if n <= 1 {
+        n
+    } else {
+        fib(n - 1) + fib(n - 2)
+    }
+}
+
+fn print_i(n) {
+    let i = 0;
+    while i < n {
+        print(i);
+        i = i + 1;
+    }
+}
+\end{code}
+
+Podem veure que el llenguatge encara no l'hi indiquem el tipus dels paràmetres
+i de retorn, ja que és algo que apareixerà més endavant. En aquesta èpica de 
+moment treballem sempre en doubles.
 
 \subsection{Declaració de tipus}
 \textit{\textbf{Completada}: 17/10/2022 - 6/11/2022} (3 esprints)

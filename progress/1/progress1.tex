@@ -348,18 +348,18 @@ IBM o Intel. Actualment hi ha diversos dels principals llenguatges de
 programació que en fan ús com ara C/C++ (a través del compilador Clang, una
 alternativa a GCC), Rust o Swift.
 
-LLVM és un toolchain per crear compiladors, és a dir que té moltes eines diferents
-que ens ajuden en la implementació de compiladors, però principalment, i el que
-ens interessa a nosaltres, és un back end (de fet n'és molts a la vegada com ja
-veurem). Un back end és la part del compilador que genera assemblador per alguna
-arquitectura en concret a partir d'una representació intermèdia. Ara bé, en el
-cas de LLVM, no genera assemblador per una arquitectura en concret, sino que en
-genera per pràcticament totes les arquitectures disponibles actualment.
-D'aquesta manera, tu, com a creador de llenguatges de programació, només t'has
-de preocupar de generar la representació intermèdia de LLVM. A partir d'aquí hi
-aplicarà optimitzacions i generarà l'assemblador de l'arquitectura que l'hi
-indiquis. Fins i tot pot generar Web Assembly, cosa que ens permet executar el
-llenguatge en navegadors web moderns.
+LLVM és un toolchain per crear compiladors, és a dir un conjunt d'eines
+diferents que ens ajuden en la implementació de compiladors, però principalment,
+i el que ens interessa a nosaltres, és un back end (de fet n'és molts a la
+vegada com ja veurem). Un back end és la part del compilador que genera
+assemblador per alguna arquitectura en concret a partir d'una representació
+intermèdia. Ara bé, en el cas de LLVM, no genera assemblador per una
+arquitectura en concret, sinó que en pot generar per pràcticament totes les
+arquitectures disponibles actualment. D'aquesta manera, tu, com a creador de
+llenguatges de programació, només t'has de preocupar de generar la representació
+intermèdia de LLVM. A partir d'aquí hi aplicarà optimitzacions i generarà
+l'assemblador de l'arquitectura que l'hi indiquis. Fins i tot pot generar Web
+Assembly, cosa que ens permet executar el llenguatge en navegadors web moderns.
 
 Donat que LLVM és independent de l'arquitectura, quan generem el codi, no ens
 hem de preocupar del nombre de registres, ja que disposen d'un nombre il·limitat
@@ -374,6 +374,73 @@ dir que només podem assignar valor a una variable una vegada. Si necessitem
 reassignar un valor, hem de crear una nova variable que la substitueixi. Això es
 fa simplement perquè facilita molt a l'hora d'aplicar optimitzacions.
 
+LLVM té el concepte de mòduls. Un mòdul conté tota la informació associada a un
+arxiu de codi. Si tenim múltiples arxius, simplement hem de crear diferents 
+mòduls i enllaçar-los.
+
+Els mòduls contenen funcions i les funcions estan formades per instruccions, 
+similars a les instruccions en assemblador.
+
+Anem a veure un exemple d'un petit fragment de codi i com seria en la
+representació intermèdia de LLVM. Tenim la següent funció  que rep dos enters i
+en retorna el màxim:
+
+\begin{code}
+fn max(int a, int b) int {
+    if a > b { a } else { b }
+}
+\end{code}
+
+Si ho traduim a LLVM tenim el següent codi:
+
+\begin{code}
+define i32 @max(i32 %a, i32 %b) {
+entry:
+  %0 = icmp sgt i32 %a, %b
+  br i1 %0, label %btrue, label %bfalse
+
+btrue:
+  br label %end
+
+bfalse:
+  br label %end
+
+end:
+  %retval = phi i32 [%a, %btrue], [%b, %bfalse]
+  ret i32 %retval
+}
+\end{code}
+
+La primera linia del codi anterior defineix una funció, la qual rep dos enters
+de 32 bits. A continuació defineix una etiqueta entry. Aquestes etiquetes són
+com les etiquetes dels assembladors, i podem anar-hi fent-hi salts.
+
+En l'etiqueta 'entry', el primer que fa és comparar els dos enters, és a dir la
+condició del 'if'. La paraula clau 'sgt' vol dir 'signed greater than', o, en
+altres paraules, fa una comparació amb signe de més gran que. El resultat de la
+comparació és un enter d'un bit. Si és true farà un salt a la label
+\texttt{btrue}, sinó anirà a \texttt{bfalse}. 
+
+En aquest cas les dues branques fan el mateix: un salt a l'etiqueta
+\texttt{end}. Allà ens hi trobem amb un concepte que són els nodes phi. Els 
+nodes phi venen a ser una especia d'if invertit. En funció de on haguem fet el 
+salt assignarem un valor o un altre a la variable \texttt{retval}. Si venim de
+\texttt{btrue} s'assigna a, i si venim de \texttt{bfalse} s'assigna b.
+
+Ara bé, per què les dues branques fan al salt a l'etiqueta \texttt{end} i
+després fem un altre condicional invertit? No podíem assignar el valor de
+\texttt{retval} directament dins de la branca \texttt{btrue} o \texttt{bfalse}?
+Doncs la resposta és que no, perquè aleshores estaríem generant codi que no està
+en forma SSA. I com hem comentat anteriorment, LLVM ens obliga a generar codi en
+forma SSA. I per això existeixen els nodes phi, per poder solucionar aquest
+tipus de problemes.
+
+\subsubsection{API de LLVM}
+Està bé entendre el codi de LLVM, però generar tot aquest codi a mà pot ser una
+mica molest i propens a errors. És per això que LLVM ens ofereix una API per
+poder generar i compilar el codi LLVM. Aquesta API és per a C++, per això hem de 
+fer servir una altra llibreria anomenada Inkwell, que ens defineix una API de 
+LLVM per a Rust, fent crides a través de FFI a l'API de C++.
 
 
 \subsection{Declaració de tipus}

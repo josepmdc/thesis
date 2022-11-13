@@ -273,6 +273,9 @@ fn parse_prototype() -> (Prototype, Err) {
 }
 \end{code}
 
+\textit{Nota:} Els comentaris en els fragments de codi estan en anglès, ja que
+\LaTeX donava problemes amb els accents.
+
 És així de simple, iterem els tokens un per un i comprovem que el token que
 estem revisant sigui el token que esperem trobar, en funció del que ens diu la
 gramàtica. I quan el que esperen és una altra producció, simplement cridem a la
@@ -336,7 +339,7 @@ funció que implementa aquesta producció. En el nostre exemple la funció
     }
 \end{code}
 
-\subsubsection{Anàlisi semàntica i generació de codi}
+\subsubsection{Generació de codi}
 En la definició del projecte vam comentar que fariem servir LLVM. Ara entrarem
 en una mica més de detall per veure que és LLVM, com funciona i com ha estat
 incorporat al projecte per tal de generar el codi.
@@ -428,8 +431,9 @@ salt assignarem un valor o un altre a la variable \texttt{retval}. Si venim de
 \texttt{btrue} s'assigna a, i si venim de \texttt{bfalse} s'assigna b.
 
 Ara bé, per què les dues branques fan al salt a l'etiqueta \texttt{end} i
-després fem un altre condicional invertit? No podíem assignar el valor de
-\texttt{retval} directament dins de la branca \texttt{btrue} o \texttt{bfalse}?
+després es torna a fer un condicional en el bloc \texttt{end}? No podíem
+assignar el valor de \texttt{retval} directament dins de la branca
+\texttt{btrue} o \texttt{bfalse} i estalviar-nos aquest tercer condicional?
 Doncs la resposta és que no, perquè aleshores estaríem generant codi que no està
 en forma SSA. I com hem comentat anteriorment, LLVM ens obliga a generar codi en
 forma SSA. I per això existeixen els nodes phi, per poder solucionar aquest
@@ -442,6 +446,30 @@ poder generar i compilar el codi LLVM. Aquesta API és per a C++, per això hem 
 fer servir una altra llibreria anomenada Inkwell, que ens defineix una API de 
 LLVM per a Rust, fent crides a través de FFI a l'API de C++.
 
+L'API disposa d'una sèrie de classes amb les quals interactuarem. La més 
+fonamental és la classe \texttt{BasicBlock}, la qual representa els blocs que 
+ens trobem dins d'una funció, és a dir el conjunt d'instruccions que es troben
+dins d'una etiqueta. El conjunt d'aquests blocs, són les funcions, les quals
+estan representades per la classe \texttt{Function}. I seguint aquesta lògica,
+tenim la classe \texttt{Modue}, que representa els mòduls, que són un conjunt de
+funcions.
+
+Totes aquestes classes neixen d'una classe base que s'anomena \texttt{Value}. 
+Aquesta classe representa qualsevol valor que pugui generar el programa, ja 
+sigui una funció, un bloc, etc. Aquesta classe és útil de cara a implementar
+les funcions de generació de codi del nostre compilador, ja que totes poden 
+retornar un \texttt{Value}, i d'aquesta manera podem crear abstraccions que ens
+faciliten el desenvolupament.
+
+Una altra classe important és \texttt{Context}. Necessitarem una sola instància
+d'aquesta classe, la qual conte un conjunt d'estructures de dades de LLVM, i que
+contindrà l'estat de la compilació.
+
+Finalment tenim la classe \texttt{Builder}, que és la que s'encarrega de generar
+el codi com a tal, i al que, per tant, anirem cridant cada com que vulguem
+generar una instrucció.
+
+\subsubsection{Anàlisi semàntica}
 
 \subsection{Declaració de tipus}
 \textit{\textbf{Completada}: 17/10/2022 - 6/11/2022} (3 esprints)

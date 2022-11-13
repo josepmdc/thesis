@@ -104,10 +104,10 @@ totes les tasques que la conformen són les tasques necessàries per poder
 desenvolupar aquesta funcionalitat.
 
 \subsection{Eines}
-Tot i ser un projecte de no gran envergadura, i format només per una persona, és
-difícil organitzar-se sense fer ús de cap eina. És per això que s'han utilitzat
-principalment dues eines: una per gestionar les tasques i els terminis, i un
-altre per gestionar el control de versions del codi font.
+Tot i ser un projecte d'una envergadura no molt gran, i format només per una
+persona, és difícil organitzar-se sense fer ús de cap eina. És per això que
+s'han utilitzat principalment dues eines: una per gestionar les tasques i els
+terminis, i un altre per gestionar el control de versions del codi font.
 
 \subsubsection{Gestió de les tasques} Per crear i gestionar les tasques s'ha
 estat fent servir Jira, com vam comentar en el primer informe. Es va triar
@@ -131,7 +131,15 @@ De totes les eines de control de versions, s'està fent servir Git, ja que és
 l'estàndard en el desenvolupament del software i és amb la que estic més 
 familiaritzat. També s'està fent servir GitHub per allotjar el repositori, ja 
 que ofereix moltes funcionalitats i a més és on es troben la gran majoria de
-projectes de codi obert i disposa d'una gran comunitat.
+projectes de codi obert i disposa d'una gran comunitat. El repositori es pot 
+trobar al següent enllaç: \url{https://github.com/josepmdc/craft}
+
+\subsection{Control de qualitat}
+Actualment el projecte disposa de tests automatitzats per al parser. Però ara
+que el projecte està ja una mica més avançat la intenció és crear tests que 
+compilin un programa sencer i comprovin que el resultat obtingut sigui el
+correcte. Això facilitarà molt més la detecció d'errors de programació i ajudarà
+a fer refactor sense causar nous errors.
 
 \section{Seguiment de la planificació}
 
@@ -146,7 +154,6 @@ mesura que va avançant.
 A continuació mirarem aquestes èpiques, una per una, per veure quin és el seu
 estat, i, per les que ja s'han completat, donar una mica més de detall de què
 han aportat al projecte i com s'han desenvolupat a un nivell més tècnic.
-
 
 \subsection{Implementació mínima de l'especificació}
 \textit{\textbf{Completada}: 13/09/2022 - 16/10/2022} (5 esprints)
@@ -175,7 +182,6 @@ algun que no és vàlid. La manera com funciona és la següent:
 
 Mentre que no hàgim arribat al final de la seqüència de caràcters, processem el
 següent caràcter en la seqüència. 
-
 Si és un parèntesi, per exemple, com que per si sol forma una seqüència vàlida,
 i no pot generar-ne cap altre, creem un nou token de tipus parèntesis i l'afegim
 al conjunt de sortida. Si per contra ens trobéssim un caràcter tipus '>', no
@@ -190,8 +196,8 @@ un caràcter alfanumèric, ja que hem de tenir en compte més coses:
 \item
     Si és un dígit, vol dir que estem processant un nombre, i per tant hem
     d'anar avançant mentre ens anem trobant dígits. Mentre processem els dígits
-    pot ser que ens trobem una coma, el que ens indicarà que és un nombre real i
-    per tant generarem un token de float. Si, no té coma en canvi, generem un
+    pot ser que ens trobem una punt, el que ens indicarà que és un nombre real i
+    per tant generarem un token de float. Si, no té punt en canvi, generem un
     token d'int.
 \item
     Si en canvi és un caràcter alfabètic, haurem d'anar avançant mentre que ens
@@ -213,7 +219,7 @@ El lexer ens ha permès identificar els símbols del programa, però no ens perm
 identificar si l'ordre és correcte o si segueix les normes del llenguatge (és a
 dir si és gramaticalment correcte). Aquesta és la funció del parser, el qual a
 partir de la seqüència de tokens, n'extraurà el significat i generarà un arbre
-sintàctic, el qual ens indica com haurem d'executar les instruccions.
+sintàctic, que ens indica com haurem d'executar les instruccions.
 
 La funció del parser és fer complir la gramàtica del llenguatge. S'ha
 implementat en la forma d'un \textit{recursive descent parser} el qual és
@@ -225,10 +231,11 @@ produccions de la gramàtica. Per exemple, si el primer token és 'fn', el parse
 començarà a explorar la producció que genera una funció. Mirarà que seguidament
 de 'fn' hi hagi un identificar. Si no hi és, es retorna un error a l'usuari. Si
 hi és, aleshores segueix descendint, mira que s'especifiquin correctament els
-paràmetres, si hi són, el valor de retorn i finalment el cos de la funció. Diem
-que és recursiu perquè pot ser que mentre estem generant, per exemple una
-expressió, pot ser que aquesta estigui formada per altres expressions, i per
-tant, tornarà a cridar de forma recursiva la producció d'expressió.
+paràmetres, si hi són, el tipus del valor de retorn i finalment el cos de la
+funció. Diem que és recursiu perquè pot ser que mentre estem generant, per
+exemple una expressió, pot ser que aquesta estigui formada per altres
+expressions, i per tant, tornarà a cridar de forma recursiva la producció
+d'expressió.
 
 Posem un exemple més il·lustratiu, amb una petita gramàtica, i com aquesta
 s'implementaria en el parser. Aquesta seria la gramàtica per generar el
@@ -365,7 +372,7 @@ l'assemblador de l'arquitectura que l'hi indiquis. Fins i tot pot generar Web
 Assembly, cosa que ens permet executar el llenguatge en navegadors web moderns.
 
 Donat que LLVM és independent de l'arquitectura, quan generem el codi, no ens
-hem de preocupar del nombre de registres, ja que disposen d'un nombre il·limitat
+hem de preocupar del nombre de registres, ja que disposem d'un nombre il·limitat
 de registres virtuals, els quals LLVM mapejarà posteriorment als registres de
 l'arquitectura corresponent.
 
@@ -426,7 +433,7 @@ comparació és un enter d'un bit. Si és true farà un salt a la label
 
 En aquest cas les dues branques fan el mateix: un salt a l'etiqueta
 \texttt{end}. Allà ens hi trobem amb un concepte que són els nodes phi. Els 
-nodes phi venen a ser una especia d'if invertit. En funció de on haguem fet el 
+nodes phi venen a ser una espècia d'if invertit. En funció d'on hàgim fet el 
 salt assignarem un valor o un altre a la variable \texttt{retval}. Si venim de
 \texttt{btrue} s'assigna a, i si venim de \texttt{bfalse} s'assigna b.
 
@@ -472,13 +479,13 @@ funció \texttt{max} anterior, ho fariem així:
 
 \texttt{Builder.CreateICmpSGT(a, b, "nom")}
 
-I això ens generarà el següent codi (línia 3 de l'exemple complet que hem vist 
-en l'apartat anterior):
-
-\texttt{\%nom = icmp sgt i32 \%a, \%b}
-
 El tercer paràmetre indica el nom de la variable generada, tot i això, només 
 serveix perquè, a l'hora de debugar, ens sigui més fàcil trobar-ho.
+
+La crida anterior ens generarà el següent codi (que és la línia 3 de l'exemple
+complet que hem vist en l'apartat anterior):
+
+\texttt{\%nom = icmp sgt i32 \%a, \%b}
 
 \subsubsection{Anàlisi semàntica}
 Un pas addicional que hem de fer és l'anàlisi semàntica, per així assegurar que
@@ -531,7 +538,7 @@ a paràmetre a les funcions.
 
 Aquesta èpica també inclou les anotacions de tipus als paràmetres de les funcions
 i el tipus de retorn de les funcions. De moment els tipus disponibles són i64,
-f64 i els que l'usuari defineixi a partir dels struct.
+f64 i els que l'usuari defineixi a partir dels structs.
 
 Implementar els structs, com la gran majoria de noves funcionalitats afegides al
 llenguatge implica modificar el lexer, el parser i la generació de codi. 
@@ -553,7 +560,7 @@ diferents d'interaccions amb els structs els analitzarem per separat.
     de dades de diferents tipus una rere l'altre. Per exemple, el struct:
 
     \begin{code}
-        struct {
+        struct SomeStruct {
             first: i64
             second: f64
         }
@@ -578,7 +585,7 @@ diferents d'interaccions amb els structs els analitzarem per separat.
     de cada camp, i el resultat l'assignarem a la posició de memòria que li
     toqui segons l'índex del camp que se li ha assignat en la definició del
     struct. Aquesta assignació de memòria es fa igual que si assignéssim una
-    variable, l'únic que canvia és com determinen la posició de memòria on
+    variable, l'únic que canvia és com determinem la posició de memòria on
     guardar-hi el valor. LLVM disposa d'una instrucció que es diu GetElementPtr
     (GEP), que ens calcula la posició de memòria del camp a partir de
     l'apuntador a l'inici del struct i l'índex del camp.
@@ -674,11 +681,12 @@ a millorar.
 \renewcommand\refname{Bibliografia}
 \begin{thebibliography}{9}
 
-\bibitem{llvmtut} LLVM Kaleidoscope Tutorial: Implementing a Language with LLVM. Accedit el 25 d'octubre, 2022, des de \url{https://llvm.org/docs/tutorial}
-\bibitem{llvm4plc} Rathi, M. A complete guide to LLVM for programming language creators. Mukuls Blogs. Accedit el 2 de Novembre, 2022, des de \\\url{https://mukulrathi.com/create-your-own-programming-language/llvm-ir-cpp-api-tutorial}
-\bibitem{ci} Nystrom, R. Crafting Interpreters. Accedit l'1 d'octubre, 2022 des de \\\url{https://craftinginterpreters.com}
-\bibitem{mhlctllvm} Mapping High Level Constructs to LLVM IR. Accedit el 20 d'octubre, 2022 des de \\\url{https://mapping-high-level-constructs-to-llvm-ir.readthedocs.io/en/latest/README.html}
-\bibitem{inkwell} Inkwell Documentation. Accedit el 4 d'octubre, 2022 des de \\\url{https://thedan64.github.io/inkwell/inkwell/index.html}
+\bibitem{llvmtut} \textit{LLVM Kaleidoscope Tutorial: Implementing a Language with LLVM}. Accedit el 25 d'octubre, 2022, des de \url{https://llvm.org/docs/tutorial}
+\bibitem{llvm4plc} Rathi, M. \textit{A complete guide to LLVM for programming language creators}. Mukuls Blogs. Accedit el 2 de Novembre, 2022, des de \\\url{https://mukulrathi.com/create-your-own-programming-language/llvm-ir-cpp-api-tutorial}
+\bibitem{ci} Nystrom, R. \textit{Crafting Interpreters}. Publicat Juliol, 2021. ISBN 0990582930.
+\bibitem{mhlctllvm} \textit{Mapping High Level Constructs to LLVM IR}. Accedit el 20 d'octubre, 2022 des de \\\url{https://mapping-high-level-constructs-to-llvm-ir.readthedocs.io/en/latest/README.html}
+\bibitem{inkwell} \textit{Inkwell Documentation}. Accedit el 4 d'octubre, 2022 des de \\\url{https://thedan64.github.io/inkwell/inkwell/index.html}
+\bibitem{compilergo} Ball, T. \textit{Writing A Compiler In Go}. Publicat Agost, 2018. ISBN 398201610X.
 
 \end{thebibliography}
 \end{document}

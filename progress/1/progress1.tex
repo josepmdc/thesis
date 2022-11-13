@@ -529,6 +529,10 @@ endavant si dona temps, ja que no és una funcionalitat imprescindible, donat qu
 es pot obtenir un funcionament similar al dels mètodes, passant els structs com
 a paràmetre a les funcions.
 
+Aquesta èpica també inclou les anotacions de tipus als paràmetres de les funcions
+i el tipus de retorn de les funcions. De moment els tipus disponibles són i64,
+f64 i els que l'usuari defineixi a partir dels struct.
+
 Implementar els structs, com la gran majoria de noves funcionalitats afegides al
 llenguatge implica modificar el lexer, el parser i la generació de codi. 
 
@@ -566,26 +570,107 @@ diferents d'interaccions amb els structs els analitzarem per separat.
     com ara que un camp no estigui duplicat, o saber en quina posició del struct
     es troba la dada que ens demana l'usuari a través de l'identificador. Per
     tant, durant el procés de compilació hem de guardar totes les definicions
-    dels structs, els seus camps, i l'ordre en el qual es troben.
+    dels structs, els seus camps, i l'ordre en el qual es troben, per així poder
+    saber on buscar la dada que ens demana l'usuari.
+
+\item \textbf{Instanciació}: Per instanciar un struct, simplement hem de recórrer
+    els camps que ens ha retornat el parser, un per un, generant les expressions
+    de cada camp, i el resultat l'assignarem a la posició de memòria que li
+    toqui segons l'índex del camp que se li ha assignat en la definició del
+    struct. Aquesta assignació de memòria es fa igual que si assignéssim una
+    variable, l'únic que canvia és com determinen la posició de memòria on
+    guardar-hi el valor. LLVM disposa d'una instrucció que es diu GetElementPtr
+    (GEP), que ens calcula la posició de memòria del camp a partir de
+    l'apuntador a l'inici del struct i l'índex del camp.
+
+\item \textbf{Accés}: L'accés és similar a la instanciació, però més simple.
+    Simplement hem de tenir l'índex del camp al qual volem accedir dins del
+    struct (per exemple si és el primer camp, l'índex 0), i l'apuntador a
+    l'inici del struct. A partir d'aquesta informació amb la instrucció GEP
+    obtenim la posició de memòria del camp.
 \end{itemize}
+
+\subsubsection{Què ens ha aportat aquesta èpica?}
+Després d'aquesta èpica ja comencen a tenir un llenguatge una mica més complet,
+ja que podem definir tipus propis a partir de structs i també especificar el tipus
+dels paràmetres i del valor de retorn de les funcions.
+
+\begin{code}
+struct SomeStruct {
+    first: i64
+    second: i64
+}
+
+fn sum(a: SomeStruct, b: i64) i64 {
+    a.first + a.second + b
+}
+\end{code}
 
 \subsection{Collections}
 \textit{\textbf{En progrés}: 31/10/2022 - 20/11/2022*} (3 esprints)
 
-Implementació d'arrays estàtics, arrays dinàmics i tuples.
+Aquesta èpica té l'objectiu d'afegir col·leccions d'elements al llenguatge. La idea
+és implementar arrays (de mida fixa, conegut en temps de compilació), i també
+slices (igual que els arrays, però la mida es pot conèixer en temps d'execució).
+
+Si donés temps també seria interessant implementar arrays dinàmics.
+
+Aquesta èpica està actualment en progrés. S'estan implementant els arrays, i un
+cop acabats s'implementaran els slices. LLVM té suport per arrays, i per tant,
+la seva implementació no és gaire complexa (similar a implementar structs). Pel
+que fa als slices, és una mica més complicat. La idea és fer servir un struct,
+on el primer camp sigui un punter al primer element i el segon camp, la longitud
+del slice.
+
+Donat que els strings també són arrays de caràcters, l'objectiu és poder 
+implementar-los.
+
+Pel que fa a arrays dinàmics, una opció seria fer ús de la funció malloc de C, i
+enllaçar el programa amb libc.
+
+\subsubsection{Què ens aportarà aquesta èpica?}
+Un cop finalitzada aquesta èpica podrem declarar arrays i slices de la forma seguent:
+
+\begin{code}
+fn test(n: i64) {
+    let array = [1, 2, 3, 4]; // array d'enters de mida fixa
+    let slice = [i64; n]; // slice d'enters de mida n
+    slice[0] = 1;
+    print(array[0] + slice[0]);
+    let str = "un string"; // array de u8;
+}
+\end{code}
 
 \subsection{Mecanisme de gestió d'errors}
-Implementar un mecanisme per tal de gestionar errors en temps d'execució.
+\textit{\textbf{Planificada}: 21/11/2022 - 11/12/2022} (3 esprints)
+
+Actualment ell llenguatge no té manera de gestionar errors, a part de retornar
+un enter que indiqui depenent del valor quin ha estat el resultat (com a C). 
+Però això no és l'ideal, per això aquesta èpica serà per definir un sistema de
+gestió d'errors una mica més elegant i no tan propens a errors.
 
 \subsection{Syntactic sugar}
+\textit{\textbf{Planificada}: 12/12/2022 - 02/01/2023} (3 esprints)
+
 Implementació de "Syntactic sugar", per tal de simplificar operacions que
 s'utilitzen freqüentment. Inclou bucles for in, match (similar a un switch),
 list comprehension, etc.
 
 \subsection{Suport per programació d'estil funcional}
+\textit{\textbf{Planificada}: 03/01/2023 - 23/01/2023} (3 esprints)
+
 Afegir suport per programació d'estil funcional, integrant funcions com ara map,
 reduce, fold, etc.
 
+\subsection{Deute tècnic}
+\textit{\textbf{En progrés}: Termini indefinit} ($\infty$ esprints)
+
+Aquesta és una nova èpica que s'ha afegit per albergar totes les tasques de 
+manteniment i millora del projecte, com ara resolució de bugs. La duració 
+d'aquesta tasca és indefinida, ja que constantment van apareixent bugs i coses
+a millorar.
+
+\newpage
 \renewcommand\refname{Bibliografia}
 \begin{thebibliography}{9}
 
@@ -593,6 +678,7 @@ reduce, fold, etc.
 \bibitem{llvm4plc} Rathi, M. A complete guide to LLVM for programming language creators. Mukuls Blogs. Accedit el 2 de Novembre, 2022, des de \\\url{https://mukulrathi.com/create-your-own-programming-language/llvm-ir-cpp-api-tutorial}
 \bibitem{ci} Nystrom, R. Crafting Interpreters. Accedit l'1 d'octubre, 2022 des de \\\url{https://craftinginterpreters.com}
 \bibitem{mhlctllvm} Mapping High Level Constructs to LLVM IR. Accedit el 20 d'octubre, 2022 des de \\\url{https://mapping-high-level-constructs-to-llvm-ir.readthedocs.io/en/latest/README.html}
+\bibitem{inkwell} Inkwell Documentation. Accedit el 4 d'octubre, 2022 des de \\\url{https://thedan64.github.io/inkwell/inkwell/index.html}
 
 \end{thebibliography}
 \end{document}

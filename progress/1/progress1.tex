@@ -7,8 +7,8 @@
 \usepackage{lipsum}
 \usepackage{graphicx}
 \usepackage{parskip}
+\usepackage[hyphens]{url}
 \usepackage{hyperref}
-\usepackage{url}
 \usepackage{caption}
 \usepackage{listings}
 
@@ -586,11 +586,13 @@ list comprehension, etc.
 Afegir suport per programació d'estil funcional, integrant funcions com ara map,
 reduce, fold, etc.
 
-\section{Passos a seguir}
-
+\renewcommand\refname{Bibliografia}
 \begin{thebibliography}{9}
 
-\bibitem{repo} Codi del projecte, \url{https://github.com/josepmdc/craft}
+\bibitem{llvmtut} LLVM Kaleidoscope Tutorial: Implementing a Language with LLVM. Accedit el 25 d'octubre, 2022, des de \url{https://llvm.org/docs/tutorial}
+\bibitem{llvm4plc} Rathi, M. A complete guide to LLVM for programming language creators. Mukuls Blogs. Accedit el 2 de Novembre, 2022, des de \\\url{https://mukulrathi.com/create-your-own-programming-language/llvm-ir-cpp-api-tutorial}
+\bibitem{ci} Nystrom, R. Crafting Interpreters. Accedit l'1 d'octubre, 2022 des de \\\url{https://craftinginterpreters.com}
+\bibitem{mhlctllvm} Mapping High Level Constructs to LLVM IR. Accedit el 20 d'octubre, 2022 des de \\\url{https://mapping-high-level-constructs-to-llvm-ir.readthedocs.io/en/latest/README.html}
 
 \end{thebibliography}
 \end{document}

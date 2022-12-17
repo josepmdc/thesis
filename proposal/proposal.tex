@@ -7,7 +7,7 @@
 \usepackage{lipsum}
 \usepackage{graphicx}
 \usepackage{parskip}
-\usepackage{listings, listings-rust}
+\usepackage{listings, ../common/listings-rust}
 \usepackage{hyperref}
 \usepackage{url}
 \usepackage{caption}
@@ -481,17 +481,12 @@ Quan cridem a la funció, hem de comprovar que no ens hagi retornat cap error:
 
 \begin{code}
 fn call_divide() -> Result<i32, string> {
-    let result = match divide(5, 0) {
-        Ok(num) => num,
-        Err(err) => return Err(err),
-    }
-
+    // If it's an Err, the code inside the brakets will run
+    // If it's Ok, the value will be assigned to the variable result
     let result = try divide(5, 0) -> |err| {
         log("Error: ", err);
         return Err(err);
     };
-
-    let result = try divide(5, 0);
 
     print("The result is: ", result);
     Ok(result)
@@ -614,22 +609,26 @@ que s'han definit són les següents:
 Per tal de gestionar totes aquestes èpiques, les seves subtasques i els sprints,
 es farà servir \textbf{Jira}, un programa de gestió de projectes que ho facilita molt.
 
-Pel que fa a la gestió de codi font, es farà servir Git, i el repositori estarà
-allotjat a GitHub \cite{repo}. Es treballarà amb branques diferents per cada
-tasca, i un cop finalitzada es farà una pull request a master, on hi haurà
-totes les funcionalitats estables.
-
-\begin{figure}
+\begin{figure}[ht]
     \includegraphics[width=\linewidth]{roadmap}
     \centering
     \captionsetup{justification=centering}
     \caption{Roadmap on es mostren les diferents èpiques i l'espai de temps on s'han de desenvolupar (fer zoom per veure-ho amb més resolució)}
 \end{figure}
 
+Pel que fa a la gestió de codi font, es farà servir Git, i el repositori estarà
+allotjat a GitHub \cite{repo}. Es treballarà amb branques diferents per cada
+tasca, i un cop finalitzada es farà una pull request a master, on hi haurà
+totes les funcionalitats estables.
+
 \section{Prioritats}
-Hem definit uns objectius i unes funcionalitats del llenguatge, però el temps 
-d'aquest treball és limitat. Per tant, hem de prioritzar les funcionalitats i 
-decidir quines són imprescindibles i quines no. En ordre de prioritat:
+Hem definit uns objectius i unes funcionalitats del llenguatge, però el temps
+d'aquest treball és limitat. Per tant, hem de prioritzar les funcionalitats i
+decidir quines són imprescindibles i quines no. Les imprescindibles seran les
+funcionalitats bàsiques necessàries per escriure un programa amb ja certa
+utilitat, mentre que les prescindibles, són funcionalitats que contribueixen a
+fer el llenguatge més agradable, però que no són 100\% necessàries
+En ordre de prioritat:
 
 \subsection{Imprescindibles}
 \begin{enumerate}

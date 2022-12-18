@@ -96,17 +96,10 @@
 % --------------------------------------
 \section{Seguiment de la planificació}
 
-Si recordem, a l'inici del treball vam definir quines eren les èpiques que
-conformarien el projecte i en quin moment es desenvoluparien. A hores d'ara
-aquestes èpiques segueixen més o menys com s'havien plantejat al seu moment,
-però amb algun canvi pel que fa al moment en el qual s'han desenvolupat (alguna
-ha durat més de l'esperat). També s'ha creat una nova èpica per albergar tots
-els bugs i tasques de manteniment i millora del projecte que van apareixent a
-mesura que va avançant. 
-
-A continuació mirarem aquestes èpiques, una per una, per veure quin és el seu
-estat, i, per les que ja s'han completat, donar una mica més de detall de què
-han aportat al projecte i com s'han desenvolupat a un nivell més tècnic.
+A l'inici del projecte, vam identificar diversos objectius que volíem assolir
+i vam definir una sèrie d'èpiques.  A continuació repassarem l'estat d'aquestes
+èpiques: quines s'han completat, quines no, i si hi ha hagut algun canvi
+respecte a l'informe anterior.
 
 \subsection{Implementació mínima de l'especificació}
 \textit{\textbf{Completada}: 13/09/2022 - 16/10/2022} (5 esprints)
@@ -193,8 +186,8 @@ fn main() {
 
 \subsubsection{Strings}
 Dins d'aqueta èpica s'han desenvolupat els strings. La seva implementació és
-relativament senzilla un cop implementat els arrays, ja que són simplement arrays
-d'enters de 8 bits. S'ha hagut d'ampliar el parser perquè identifiqui les
+relativament senzilla un cop implementats els arrays, ja que són simplement
+arrays d'enters de 8 bits. S'ha hagut d'ampliar el parser perquè identifiqui les
 strings i després es tracten com a arrays.
 
 \subsubsection{printf}
@@ -305,9 +298,9 @@ casuístiques.
 \section{Control de qualitat}
 Els tests automatitzats són una part important del desenvolupament de
 programari, ja que ajuda a assegurar la qualitat i la fiabilitat del codi. Ens
-permet detectar i arreglar errors que poder no hauríem detectat provant-ho a mà.
-A més a més, a mesura que el projecte es va fent gran, és inviable provar-ho tot
-de forma manual.
+permet detectar errors que poder no hauríem detectat provant-ho a mà. A més a
+més, a mesura que el projecte es va fent gran, és inviable provar-ho tot de
+forma manual.
 
 Hi ha diferents tipus de tests automatitzats que es poden implementar. Els tests
 unitaris són un tipus de test que se centren en unitats individuals de codi, com
@@ -322,7 +315,7 @@ tests que he implementat són tests d'integració.
 Els tests d'integració són un altre tipus de test automatitzat que se centren en
 com diferents unitats de codi treballen juntes. La forma en la qual els he 
 implementat és escrivint programes en el llenguatge desenvolupat, compilant-los 
-i executant-los i comprovant que el resultat és l'esperat. Per exemple pels 
+, executant-los i comprovant que el resultat és l'esperat. Per exemple pels 
 arrays hi ha un petit programa que crea un array, el passa com a paràmetre a una
 funció i fa print dels seus elements. Aleshores el test comprovaria que els 
 valors printats siguin els de l'array. I després faríem un altre test que 

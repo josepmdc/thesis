@@ -583,6 +583,84 @@ fn main() {
 
 Sortida: 6765
 
+\subsection{Nested structs}
+
+\begin{code}
+struct InnerInnerStruct {
+    field: i64
+}
+
+struct InnerStruct {
+    inner_inner: InnerInnerStruct
+}
+
+struct OuterStruct {
+    inner: InnerStruct
+}
+
+fn extract_field(outer: OuterStruct) i64 {
+    outer.inner.inner_inner.field
+}
+
+fn main() {
+    let outer = OuterStruct!{ 
+        inner: InnerStruct!{
+            inner_inner: InnerInnerStruct!{
+                field: 42,
+            },
+        },
+    };
+
+    printf("%d", extract_field(outer));
+}
+\end{code}
+
+Resultat: 42
+
+\subsection{Calculadora de nombres complexos}
+\begin{code}
+struct ComplexNumber {
+    real:      f64
+    imaginary: f64
+}
+
+fn add(x: ComplexNumber, y: ComplexNumber) ComplexNumber {
+    ComplexNumber!{
+        real: x.real + y.real,
+        imaginary: x.imaginary + y.imaginary,
+    }
+}
+
+fn multiply(x: ComplexNumber, y: ComplexNumber) ComplexNumber {
+    ComplexNumber!{
+        real: x.real * y.real - x.imaginary * y.imaginary,
+        imaginary: x.real * y.imaginary + x.imaginary * y.real,
+    }
+}
+
+fn main() {
+    let x = ComplexNumber!{
+        real: 1.0,
+        imaginary: 2.0,
+    };
+    let y = ComplexNumber!{
+        real: 3.0,
+        imaginary: 4.0,
+    };
+
+    let z = add(x, y);
+    printf("The sum of x and y is %f + %fi\n", z.real, z.imaginary);
+
+    z = multiply(x, y);
+    printf("The product of x and y is %f + %fi\n", z.real, z.imaginary);
+}
+\end{code}
+Resultat: 
+
+The sum of x and y is 4.000000 + 6.000000i
+
+The product of x and y is -5.000000 + 10.000000i
+
 \newpage
 \renewcommand\refname{Bibliografia}
 \begin{thebibliography}{9}

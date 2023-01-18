@@ -84,7 +84,18 @@
 
     \bigskip
 
-    \textbf{Resum--} Resum del projecte, màxim 10 línies.
+    \textbf{Resum--} Aquesta tesi presenta el disseny i desenvolupament d'un nou
+    llenguatge de programació anomenat \textit{Craft}, utilitzant Rust i LLVM.
+    L'objectiu del projecte és aconseguir una comprensió més profunda de com
+    funcionen els compiladors creant-ne un des de zero amb aquestes eines. El
+    llenguatge està dissenyat per ser senzill i fàcil d'entendre, però al mateix
+    temps, pretén ser ràpid i eficient, per la qual cosa s'han de fer alguns
+    sacrificis. La tesi cobreix el disseny i la implementació del llenguatge,
+    incloent-hi el lexer, el parser i la generació de codi. El projecte també
+    inclou una discussió sobre els reptes trobats durant el desenvolupament i
+    suggeriments per a treballs futurs. En general, el projecte serveix com una
+    valuosa experiència d'aprenentatge per comprendre el funcionament intern
+    dels compiladors i les capacitats de Rust i LLVM.
 
     \bigskip
 
@@ -387,6 +398,41 @@ to be able to solve this types of problems.
 
 \subsubsection{LLVM API}
 
+It's important to understand the LLVM IR, but generating all of that code by 
+hand is a lot of work and it would require us to put a lot of infrastructure in
+place. Fortunately for us, LLVM comes with a C++ API, that makes generating the
+IR a lot easier. There's the little problem that we are not using C++, but 
+thankfully, there's a Rust library called Inkwell, that offers a comfortable and 
+idiomatic Rust interface to the LLVM API. Under the hood it calls the C++ API
+by using FFI (Foreign Function Interface).
+
+The API is made of several entities. The most fundamental one is the
+\texttt{BasicBlock}, which represents the blocks that we find inside a function,
+i.e. the set of instructions we find within a label. If we group a bunch of
+BasicBlocks, we have an entity call \texttt{Function}, which, you guess it 
+represents a function in the IR. And by grouping a bunch of functions we get the
+\texttt{Module} entity. As you may notice these entities represent the different
+parts that we saw when we talked about the IR.
+
+Una altra classe important és \texttt{Context}. Necessitarem una sola instància
+d'aquesta classe, la qual conte un conjunt d'estructures de dades de LLVM, i que
+contindrà l'estat de la compilació.
+
+Finally we have the \texttt{Builder} entity, which is the one in charge of 
+actually generating the code. For example, if we want to generate a comparison,
+like the one we saw on the IR example, we would call the \texttt{Builder}, 
+telling it which instruction to generate:
+
+\texttt{Builder.CreateICmpSGT(a, b, "some-name")}
+
+The first two parameters are the two values being compared. The third 
+indicates the name of the generated variable (we can give it any name we want,
+it's only useful for debugging).
+
+The previous call will generate the following code (which is the third line of
+the IR example we saw):
+
+\texttt{\%nom = icmp sgt i32 \%a, \%b}
 
 \section{Results}
 \section{Conclusions}

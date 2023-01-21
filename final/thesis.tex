@@ -10,15 +10,18 @@
 \usepackage[top=2cm, bottom=1.5cm, left=2cm, right=2cm]{geometry}
 \usepackage[figurename=Fig.,tablename=TAULA]{caption}
 \usepackage{listings, ../common/listings-rust}
+\usepackage[hyphens]{url}
+\usepackage{hyperref}
 
 \graphicspath{ {img/} }
 
 \lstnewenvironment{code}[1][]%
 {
-   \noindent
-   \minipage{\linewidth} 
-   \vspace{0.5\baselineskip}
-   \lstset{language=Rust, style=colouredRust,#1}}
+    \scriptsize
+    \noindent
+    \minipage{\linewidth} 
+    \vspace{0.5\baselineskip}
+    \lstset{language=Rust, style=colouredRust,#1}}
 {\endminipage}
 
 \author{\LARGE\sffamily Josep Maria Domingo Catafal}
@@ -138,16 +141,197 @@ runtime, but slows down development.
 
 \section{Goals}
 
+We can see that we have two very opposite paradigms: one seeks performance with
+the downside of a slow development, while the other prefers to speed up the
+development in exchange for slowing down execution. The aim of this project, is
+to create a programming language that sits in the middle of these two paradigms,
+making sacrifices on both sides.
+
+Sacrifices in development agility:
+\begin{itemize}
+     \item \textbf{Compiled}: It will be a compiled language, in order to obtain a
+         good performance and avoid run-time errors as much as possible. This 
+         will make development time slower, since the programmer will have to
+         recompile the code on every change. The bigger the project the more 
+         noticeable the slow-down will be.
+     \item \textbf{Strongly typed}: Having a strong time system helps avoiding
+         runtime errors, since a lot of the mistakes the programmer can make are
+         catched at compile time. They also help document the code, making it 
+         easyer to understand what it's doing. The downsides are that they may 
+         make the code more verbose and create a mental overhead when writing 
+         the and having to think of the type to use (even though this could also 
+         be seen as a good thing since it makes the developer more conscious of 
+         what he's doing).
+     \item \textbf{Immutability}: Will try to force immutability whenever
+         if possible, in order to avoid side effects, and to facilitate purification
+         of the code
+\end{itemize}
+
+Sacrifices in execution performance
+\begin{itemize}
+     \item \textbf{Automatic memory management}: The user will not have to worry
+         to delete the memory manually.
+\end{itemize}
+
 \section{State of the art}
-\subsection{Programming Languages}
+A programming language resables, in a way, a natural language, and like natural
+languages, there's a lot of different ones with different properties. We mainly
+have two different ways to classify them: by paradigm and by how they are
+implemented. The paradigm allows us to classify based on their features and the
+way we write programs with them. It tells us something about the design of the
+language. On the other hand we have the implementation which tells us
+information about how the programs are run. About how the code we write turns
+into instructions the CPU can execute. A programming language can have many
+implementations, but there's usually one that is the "official" one, and that's
+the ones we are going to talk about when talking about implementations.
+
+\subsection{Paradigms}
+\subsubsection{Imperative}
+\begin{itemize}
+    \item \textbf{Object-Oriented}\\
+    \item \textbf{Procedural}\\
+\end{itemize}
+
+\subsubsection{Declarative}
+\begin{itemize}
+    \item \textbf{Functional}\\
+    \item \textbf{Logical}\\
+    \item \textbf{Mathematical}\\
+    \item \textbf{Reactive}\\
+\end{itemize}
+
+\subsection{Implementations}
+\subsubsection{Compiled}
+\subsubsection{Interpreted}
+
+\subsection{Memory management}
+
 \subsection{Compilers}
 
 \section{Methodology}
 
+\section{Language Design}
+
+\subsection{Start of the program}
+The starting point of craft programs is at the main function.
+
+\begin{code}
+fn main() {
+    printf("Hello World!\n");
+}
+\end{code}
+
+As you can see in the above snippet, functions are declared with the fn keyword,
+followed by its name, and  the parameters between parenthesis (in this case it 
+has no parameters).
+
+\subsubsection{Variable declaration}
+Variables are declared with the keyword \texttt{let}. The type of the variable
+is infered from the value.
+
+\begin{code}
+let four = 2 + 2; // type inferred to be an integer
+let four = 2.0 + 2.0; // type inferred to be float
+\end{code}
+
+\subsection{Primitive types}
+By default Craft comes with some built-in (primitive), data types. This are the
+following:
+
+\begin{itemize}
+    \item i64: 64 bit integer
+    \item f64: 64 bit float
+    \item string: array of characters
+    \item bool: boolean
+\end{itemize}
+
+\subsection{Loops and control flow}
+
+\subsection{Expressions and statements}
+Craft is an expression based language, which means that most constructs in the
+language are expressions. An expression is a valid unit of code that evaluates
+to a value. So for example, 2+2 is an expression, since it's a unit of code that
+evaluates to a value (4 in this case). On the other hand we have statements,
+which don't evaluate to a value. For example, (\texttt{let a = 2+2;} is a
+statement that contains the 2 + 2 expression, but the value is captured by the
+variable a, thus it's not returned and it becomes an statement. Usually
+statements end in semicolon, except special cases like for example loops.
+
+So when we said that Craft is expression based, it means that pretty much
+everything returns a value. For example if statements, are not actually
+statements, but expressions. We can do something like this:
+
+\begin{code}
+    let max = if a >= b { a } else { b };
+\end{code}
+
+In the code snippets we are assigning the value returned from the if expression
+to a variable. We can do that, because the last item in each of the branches of
+the if expression is returning an expression (of the same type). Whenever the
+last thing of a code block does not contain a semicolon, it means that block
+will return the value of evaluating that expression. So this actually works: 
+
+\begin{code}
+    let two = {
+        2 + 2
+    };
+\end{code}
+
+The block ends in an expression without semicolon, thus it returns the value of
+evaluating the expression (4) and assigns that to the variable. This works for 
+functions too:
+
+\begin{code}
+    fn add(a: i64, b: i64) i64 {
+        a + b
+    }
+
+    fn max(a: i64, b: i64) i64 {
+        if a >= b { a } else { b }
+    }
+\end{code}
+
+If we were to add a semicolon to any of the return expressions on the previous
+functions, we would get a compilation error, since we would turn the expressions
+into statements, and the function would not return anything.
+
+\subsubsection{Examples of expressions}
+\begin{code}
+func() // function calls
+2 + 2 // arithmetic operations
+if x != y { x } else { y }; // if else
+x > y // binary comparisons
+{ expr } // code blocks
+\end{code}
+
+\subsubsection{Examples of statements}
+\begin{code}
+let a = 2 + 2; // variable declaration
+while true {  } // loops
+\end{code}
+
+\subsection{Data structures}
+We talked about some primitive data types, but that's not always enough to model
+more complex programs. That's why we can define custom data structures using 
+structs. Structs work the same way they do in other languages like C or Rust.
+
+\begin{code}
+struct User {
+    name: string
+    age: i64
+}
+\end{code}
+
+\subsection{Immutability}
+
+\subsection{Naming conventions}
+In Craft function and variable names are written in snake\_case. It's 
+only structs that are written in PascalCase.
+
 \section{Tech Stack}
 
 Writing a compiler does not require many tools, but some of them can help a lot
-in paving the road. For this compiler we are going to use two tools: 
+in paving the road. For this compiler we are going to mainly use two tools: 
 The Rust Programming Language and LLVM.
 
 We are also going to use two tools for managing the source code: Git with GitHub
@@ -295,7 +479,6 @@ Here's an example of a simple grammar for parsing function prototypes:
 If we were to translate the proto rule to code, it would look something like 
 this:
 
-\begin{scriptsize}
 \begin{code}
 fn parse_prototype() -> (Prototype, Err) {
     // we expect to find the fn keyword,
@@ -326,7 +509,6 @@ fn parse_prototype() -> (Prototype, Err) {
     };
 }
 \end{code}
-\end{scriptsize}
 
 \subsection{Semantic Analysis and [IR] Code Generation}
 Once we have an AST, we can traverse it to generate the LLVM IR. Since this is a
@@ -351,7 +533,6 @@ fn max(int a, int b) int {
 
 If we translate it to LLVM IR we have the following code:
 
-\begin{scriptsize}
 \begin{code}
 define i32 @max(i32 %a, i32 %b) {
 entry:
@@ -369,7 +550,6 @@ end:
   ret i32 %retval
 }
 \end{code}
-\end{scriptsize}
 
 The first line of the previous code defines a function, which receives two
 32 bits integers. A label entry is defined below. These tags are like assembly
@@ -414,9 +594,8 @@ represents a function in the IR. And by grouping a bunch of functions we get the
 \texttt{Module} entity. As you may notice these entities represent the different
 parts that we saw when we talked about the IR.
 
-Una altra classe important és \texttt{Context}. Necessitarem una sola instància
-d'aquesta classe, la qual conte un conjunt d'estructures de dades de LLVM, i que
-contindrà l'estat de la compilació.
+Another important entity is \texttt{Context}. We just need and instance of it, 
+and it will keep track of the state of the compilation.
 
 Finally we have the \texttt{Builder} entity, which is the one in charge of 
 actually generating the code. For example, if we want to generate a comparison,
@@ -438,20 +617,58 @@ the IR example we saw):
 \section{Conclusions}
 
 \begin{thebibliography}{11}
-\bibitem{latex}
-http://en.wikibooks.org/wiki/LaTeX
 
-\bibitem{2}
-Referència 2
-
-\bibitem{3}
-Etc.
+\bibitem{llvmtut} \textit{LLVM Kaleidoscope Tutorial: Implementing a Language with LLVM}. Accessed the 25th of october, 2022, from \url{https://llvm.org/docs/tutorial}
+\bibitem{llvm4plc} Rathi, M. \textit{A complete guide to LLVM for programming language creators}. Mukuls Blogs. Accedit el 2 de Novembre, 2022, des de \\\url{https://mukulrathi.com/create-your-own-programming-language/llvm-ir-cpp-api-tutorial}
+\bibitem{ci} Nystrom, R. \textit{Crafting Interpreters}. Publicat Juliol, 2021. ISBN 0990582930.
+\bibitem{mhlctllvm} \textit{Mapping High Level Constructs to LLVM IR}. Accedit el 20 d'octubre, 2022 des de \\\url{https://mapping-high-level-constructs-to-llvm-ir.readthedocs.io/en/latest/README.html}
+\bibitem{inkwell} \textit{Inkwell Documentation}. Accedit el 4 d'octubre, 2022 des de \\\url{https://thedan64.github.io/inkwell/inkwell/index.html}
+\bibitem{compilergo} Ball, T. \textit{Writing A Compiler In Go}. Publicat Agost, 2018. ISBN 398201610X.
+\bibitem{lea} LEA, x86 Instruction Set Reference. Accedit el 18 de desembre, 2022 \\\url{https://c9x.me/x86/html/file_module_x86_id_153.html}
 
 \end{thebibliography}
 
 \appendix
 
 \section*{Apèndix}
+
+\begin{code}
+struct ComplexNumber {
+    real:      f64
+    imaginary: f64
+}
+
+fn add(x: ComplexNumber, y: ComplexNumber) ComplexNumber {
+    ComplexNumber!{
+        real: x.real + y.real,
+        imaginary: x.imaginary + y.imaginary,
+    }
+}
+
+fn multiply(x: ComplexNumber, y: ComplexNumber) ComplexNumber {
+    ComplexNumber!{
+        real: x.real * y.real - x.imaginary * y.imaginary,
+        imaginary: x.real * y.imaginary + x.imaginary * y.real,
+    }
+}
+
+fn main() {
+    let x = ComplexNumber!{
+        real: 1.0,
+        imaginary: 2.0,
+    };
+    let y = ComplexNumber!{
+        real: 3.0,
+        imaginary: 4.0,
+    };
+
+    let z = add(x, y);
+    printf("The sum of x and y is %f + %fi\n", z.real, z.imaginary);
+
+    z = multiply(x, y);
+    printf("The product of x and y is %f + %fi\n", z.real, z.imaginary);
+}
+\end{code}
 
 \setcounter{section}{1}
 

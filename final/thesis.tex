@@ -114,35 +114,151 @@
 \blfootnote{$\bullet$ Treball tutoritzat per: Javier Sanchez Pujadas (Ciències de la Computació)}
 \blfootnote{$\bullet$ Curs 2022/23}
 
-\section{Introduction}
-\lettrine[lines=3]{H}{istorically}, there has always been a dilemma between the
-speed of execution, and speed of development. Some languages are easy to
-program: they allow the programmer to not worry about low-level concepts such as
-memory management, and create abstractions that streamline the development. The
-problem is that these abstractions limit language efficiency, and create slower
-programs. Another reason that allows speeding up development is dynamic typing,
-as it frees the user from the mental overhead that comes with deciding the type
-that should be used. But this also has its own disadvantages, since it is very
-likely that you will encounter errors in timing of execution These languages
-tend to be interpreted in order to save money it waits for the programmer, but
-it has an impact on the execution performance of the program if we compare it to
-compiled languages. Python, for example, would be one of the largest
-representatives of this group of languages. On the other side of the currency
-and we have languages like C, which have almost no abstraction and the
-programmer must be aware of what he is doing in every line of code he writes.
-they are languages that provide very good performance, but slow down the
-development, as the programmer must take into account many concepts of low level
-An additional problem is that when managing shape memory manual, it opens the
-door to a lot of runtime errors in the form of memory leaks. Currently, there
-are languages like Rust that solve this these memory management issues without
-losing performance, but the development is still slow and the compilation time
-long. these languages tend to be strongly typed, which reduces errors in
-runtime, but slows down development.
+\section{Introduction} \lettrine[lines=3]{H}{istorically}, there has always been
+a dilemma between the speed of execution, and speed of development. Some
+languages are easy to program: they allow the programmer to not worry about
+low-level concepts such as memory management, and create abstractions that
+streamline the development. The problem is that these abstractions limit the
+language's efficiency, and create slower programs. Another reason that allows
+speeding up the development is dynamic typing, as it frees the user from the
+mental overhead that comes with deciding the type that should be used. But this
+comes with its own disadvantages, since it is very likely that you will
+encounter runtime errors unless you use something like a static analyzer. These
+languages tend to be interpreted in order to save the programmer the time it
+takes to recompile the program, but it has an impact on the runtime
+performance of the program if we compare it to compiled languages. Python, for
+example, would be one of the largest representatives of this group of languages.
+On the other hand we have languages like C, which have almost no abstraction and
+the programmer must be aware of what he is doing in every line of code he
+writes. They are languages that provide very good performance, but slow down the
+development, as the programmer must take into account many low-level concepts.
+An additional problem is that when managing memory manually, it opens the door
+to a lot of runtime errors in the form of memory leaks and segmentation faults.
+Currently, there are languages like Rust that solve these memory management
+issues without losing performance, but the development is still slow (maybe even
+slower) and the compilation time long. These languages tend to be strongly
+typed, which helps reduces runtime errors.
+
+In this thesis we will explore the different types of programming languages, and
+we will implement a simple programming language that aims to find balance 
+between the different trade-offs we talked about.
+
+\section{State of the art}
+A programming language resembles, in a way, a natural language, and like natural
+languages, there's a lot of different ones with different properties. We mainly
+have two different ways to classify them: by paradigm and by how they are
+implemented. The paradigm allows us to classify based on their features and the
+way we write programs with them. It tells us something about the design of the
+language. On the other hand we have the implementation which tells us
+information about how the programs are run. About how the code we write turns
+into instructions the CPU can execute. A programming language can have many
+implementations, but there's usually one that is the "official" one, and that's
+the ones we are going to focus on.
+
+\subsection{Paradigms}
+In the following sections we are going to take a look at the main paradigms in
+programming languages, even though, some of them may be considered sub-paradigms
+of the others. It's also important to note that most programming languages can
+fit into multiple of these paradigms, and thus they are multi-paradigm. We are
+going to discuss the most popular paradigms, but there are many more.
+
+\subsubsection{Imperative}
+Imperative programming languages follow a model of programming that is based on
+statements that change the state of the program. When we write an imperative 
+program, we specify step by step what the computer has to do. Imperative 
+programming is often implemented as procedural programming, a subtype in which
+statements are structured into procedures (also known as functions). Most of
+the programming languages we use nowadays can fit into this category, including
+C/C++, Java, C\#, Go, Lua, JavaScript, etc.
+
+\subsubsection{Object-oriented}
+It's a subtype of imperative and procedural programming, in which data and
+behavior is grouped in units called objects. These objects hold data, and they
+can be modified by functions known as methods. The main representatives of this
+paradigm are languages like Java, C\# or C++. These languages represent objects
+using classes and have many abstractions like inheritance and polymorphism.
+
+\subsubsection{Functional}
+Functional programming has the idea of treating computation as the evaluation of
+mathematical functions. Most of the functional languages are characterized by
+the use of recursive functions, immutable data and anonymous functions. Even
+though most modern languages incorporate functional programming in one way or
+another, some languages that we could call functional are Haskell (being one of
+the purest), OCaml, Clojure, Scala or Lisp, between others.
+
+\subsubsection{Logic}
+Logic programming is a programming paradigm that is based on formal logic. Their
+reasoning is similar to the SQL database language. Some examples of logic
+programming languages include Prolog or Datalog.
+
+\subsubsection{Scripting}
+Scripting languages are languages that are aimed to writing scripts and small
+programs that try to solve a very specific problem, like automating a task. They
+are also embedded in other programs, to allow the user to add or modify
+functionality of it by writing scripts. Some popular scripting languages are 
+Python, Lua and command languages like Bash or Fish.
+
+\subsection{Implementations}
+There are different ways to implement a programming language. One is by writing
+a compiler and the other one is by writing an interpreter. Both have it's
+upsides and it's downsides, and usually, depending on the design of the
+programming language and its goals, one may be a better option than the other.
+
+\subsubsection{Interpreted}
+Interpreted languages, are languages that don't need to be compiled before they
+are run. When you run a program they take the original source code and interpret
+it at runtime. The major downside of this type of implementations is that we may
+have made an error writing the code, and we won't find out until we run it. This
+can be quite dangerous since it means the program can crash at runtime because
+of a typo or some other kind of silly mistake that could've been caught by a
+compiler.
+
+On the other hand, they offer a good developer experience, specially for
+prototyping or writing quick scripts. That's because you don't have to wait for
+the compiler to generate the code, you can just run it and make modifications to
+the program while it's running, without the need to restart it. They can also be
+embedded into other programs and be used to script the beahaviour of that
+program. An example of that are game engines, that are usually written in a
+compiled languages like C++, but they integrate a scripting language for all the
+gameplay development.
+
+Some popular interpreted programming languages are Python, JavaScript, Lua or
+PHP. These are some of the most popular languages altogether, and that's
+because, they are very friendly languages, with a low barrier of entrance.
+
+\subsubsection{Compiled}
+Compiled languages are languages that turn the source code into machine code for
+a specific CPU architecture. They usually have a better runtime performance than
+interpreters, since they generate optimized machine code for that specific
+architecture. Another good thing about compiled languages is that they can catch
+a lot of bugs at compile time, since they have to check weather the program is
+valid in order to generate the machine code. This comes with a downside that is
+that it slows down development time, since we need to recompile the code on
+every change before we can run it.
+
+Some popular compiled programming languages nowadays are C/C++, Go or Rust.
+There are different ways these compilers are implemented. Some of them, like Go,
+generate all the machine code by themselves. But others, like Rust or C/C++ with
+the clang compiler, generate an intermediate representation, and then use LLVM
+to generate the machine code. This way they don't have to re-implement the code
+generation, they just use the one LLVM does.
+
+There's another breed of compiled languages, like for example Java, that
+compile to bytecode, an intermediate instruction set, and then use a Virtual 
+Machine that compiles Just In Time (JIT) the bytecode to machine code.
+
+In the case of Craft, it's implemented as a compiler using LLVM, since we are
+looking for fast runtimes, and we also want a strong type system paired with
+compile time checks.
+
+% \subsection{Memory management}
+
+% \subsection{Compilers}
 
 \section{Goals}
 
-We can see that we have two very opposite paradigms: one seeks performance with
-the downside of a slow development, while the other prefers to speed up the
+We can see that we have two very opposite philosophies: one seeks performance
+with the downside of a slow development, while the other prefers to speed up the
 development in exchange for slowing down execution. The aim of this project, is
 to create a programming language that sits in the middle of these two paradigms,
 making sacrifices on both sides.
@@ -154,61 +270,71 @@ Sacrifices in development agility:
          will make development time slower, since the programmer will have to
          recompile the code on every change. The bigger the project the more 
          noticeable the slow-down will be.
-     \item \textbf{Strongly typed}: Having a strong time system helps avoiding
+     \item \textbf{Strongly typed}: Having a strong time system helps to avoid
          runtime errors, since a lot of the mistakes the programmer can make are
-         catched at compile time. They also help document the code, making it 
-         easyer to understand what it's doing. The downsides are that they may 
+         caught at compile time. They also help document the code, making it 
+         easier to understand what it's doing. The downsides are that they may 
          make the code more verbose and create a mental overhead when writing 
-         the and having to think of the type to use (even though this could also 
-         be seen as a good thing since it makes the developer more conscious of 
-         what he's doing).
+         the code and having to think of the type to use (even though this could
+         also be seen as a good thing since it makes the developer more
+         conscious of what he's doing).
      \item \textbf{Immutability}: Will try to force immutability whenever
-         if possible, in order to avoid side effects, and to facilitate purification
-         of the code
+         possible, in order to avoid side effects, and to facilitate debugging.
 \end{itemize}
 
 Sacrifices in execution performance
 \begin{itemize}
      \item \textbf{Automatic memory management}: The user will not have to worry
-         to delete the memory manually.
+         about deleting the memory manually. In its current state, only stack 
+         memory can be used. But the goal is to also allow heap memory usage,
+         and the memory will be automatically freed using a garbage collector.
 \end{itemize}
-
-\section{State of the art}
-A programming language resables, in a way, a natural language, and like natural
-languages, there's a lot of different ones with different properties. We mainly
-have two different ways to classify them: by paradigm and by how they are
-implemented. The paradigm allows us to classify based on their features and the
-way we write programs with them. It tells us something about the design of the
-language. On the other hand we have the implementation which tells us
-information about how the programs are run. About how the code we write turns
-into instructions the CPU can execute. A programming language can have many
-implementations, but there's usually one that is the "official" one, and that's
-the ones we are going to talk about when talking about implementations.
-
-\subsection{Paradigms}
-\subsubsection{Imperative}
-\begin{itemize}
-    \item \textbf{Object-Oriented}\\
-    \item \textbf{Procedural}\\
-\end{itemize}
-
-\subsubsection{Declarative}
-\begin{itemize}
-    \item \textbf{Functional}\\
-    \item \textbf{Logical}\\
-    \item \textbf{Mathematical}\\
-    \item \textbf{Reactive}\\
-\end{itemize}
-
-\subsection{Implementations}
-\subsubsection{Compiled}
-\subsubsection{Interpreted}
-
-\subsection{Memory management}
-
-\subsection{Compilers}
 
 \section{Methodology}
+Writing a compiler involves several steps. First, even though not strictly part
+of the compiler development, the language has to be designed. The syntax of the
+language, the symbols and the reserved keywords have to be defined. This design
+may evolve later on since we may find it's ambiguous or that it's too complex to
+implement.
+
+Secondly we need to define the formal grammar for the language we designed. This
+will help us greatly when writing the parser. The grammar will tell us how the
+sentences of the language are built.
+
+Thirdly, we have the implementation steps, which are three. The lexer, the
+parser and the semantic analysis and code generation. We have to implement them
+in that order, since they depend on the steps made by the previous one.  We will
+see later on with more detail what this steps involve. But for now, simply we
+know that, for every new feature we want to add to the language, we have to
+implement it in every one of these steps.
+
+It's also important to divide the languages into subsets, since this way we 
+can start testing it. We don't need to implement all the features in the lexer,
+then in the parser, etc. We can implement the basic functionality in all the 
+steps, and then start again on the lexer and add a new feature and so on. In the
+case of this thesis it was also important, since there's no time nor resources
+to implement all the features, so only a subset of features of the original 
+design was implemented.
+
+\section{Git and GitHub}
+For version control Git was chosen since it's the industry standard and one of
+the most powerful tools out there. The repo is hosted on GitHub which is great
+for open source projects and allows us to use GitHub Actions, which run certain
+actions we define on GitHub servers for free.
+
+\subsection{Quality Assurance}
+Apart from the implementation of the compiler itself, it's also important to 
+test that it's actually working properly. To do that a test suit was developed,
+which consists of a few Craft programs that are compiled and executed. Then 
+the output of the program is checked and if it's not valid the test fails.
+
+Additionally, to leverage the features GitHub offers, a GitHub Action is run 
+every time a Pull Request is opened. GitHub Actions, allow us to compile the 
+project, run the test suit, run a linter and check that the formatting of the 
+code follows the style guide. If any of these steps fails, the Pull Request
+cannot be merged to the main branch. This way we make sure that only working 
+code (at least according to the test cases we defined) is merged into the stable 
+branch.
 
 \section{Language Design}
 
@@ -246,6 +372,37 @@ following:
 \end{itemize}
 
 \subsection{Loops and control flow}
+The way to repeat instructions multiple times in Craft is by using while loops.
+They can be used like so:
+\begin{code}
+    let i = 0;
+    while i < 100 {
+        // do stuff
+        i = i + 1;
+    }
+\end{code}
+
+Another way to repeat instructions is by using recursion:
+\begin{code}
+fn fib(n: i64) i64 {
+    if n <= 1 {
+        n
+    } else {
+        fib(n - 1) + fib(n - 2)
+    }
+}
+\end{code}
+
+Apart from loops, we also have if statements to create branches in our code. 
+They can be used like so:
+
+\begin{code}
+    if a > b {
+        // do stuff
+    } else {
+        // do other stuff
+    }
+\end{code}
 
 \subsection{Expressions and statements}
 Craft is an expression based language, which means that most constructs in the
@@ -254,7 +411,7 @@ to a value. So for example, 2+2 is an expression, since it's a unit of code that
 evaluates to a value (4 in this case). On the other hand we have statements,
 which don't evaluate to a value. For example, (\texttt{let a = 2+2;} is a
 statement that contains the 2 + 2 expression, but the value is captured by the
-variable a, thus it's not returned and it becomes an statement. Usually
+variable 'a', thus it's not returned, and it becomes a statement. Usually
 statements end in semicolon, except special cases like for example loops.
 
 So when we said that Craft is expression based, it means that pretty much
@@ -275,6 +432,11 @@ will return the value of evaluating that expression. So this actually works:
     let two = {
         2 + 2
     };
+
+    let x = {
+        let x = func();
+        x
+    }
 \end{code}
 
 The block ends in an expression without semicolon, thus it returns the value of
@@ -297,11 +459,16 @@ into statements, and the function would not return anything.
 
 \subsubsection{Examples of expressions}
 \begin{code}
-func() // function calls
-2 + 2 // arithmetic operations
-if x != y { x } else { y }; // if else
-x > y // binary comparisons
-{ expr } // code blocks
+// function calls
+func()
+// arithmetic operations
+2 + 2 
+// if else
+if x != y { x } else { y }
+// binary comparisons
+x > y 
+// code blocks
+{ expr }
 \end{code}
 
 \subsubsection{Examples of statements}
@@ -320,6 +487,15 @@ struct User {
     name: string
     age: i64
 }
+\end{code}
+
+When creating an instance of a struct we do it the following way:
+
+\begin{code}
+    let user = User!{
+        name: "Tux",
+        age: 27,
+    };
 \end{code}
 
 \subsection{Immutability}
@@ -348,7 +524,7 @@ collector or reference counting (and thus not compromising on performance).
 This combined with its powerful type system, help catch a lot of bugs at 
 compile-time.
 
-For this reasong we are going to use this language. It's also really comfortable
+For this reason we are going to use this language. It's also really comfortable
 to use and comes with a lot of great tooling like cargo, which is the command 
 line tool used for compiling, managing dependencies, etc. and clippy, a linter
 that comes built in and gives great hints on how to improve the code.
@@ -389,23 +565,13 @@ variable once. If we need to reassign a value, a new variable has to be created
 that replaces the other one. The reason SSA is used is because it makes 
 applying optimizations a lot easier.
 
-\section{Git and GitHub}
-For version control Git was chosen since it's the industry standard and one of
-the most powerful tools out there. The repo is hosted on GitHub which is great
-for open source projects and allows us to use GitHub Actions. The repository is 
-configured such as that on every Pull Request or commit to the master branch,
-a GitHub action runs that compiles the code, runs Clippy, runs the tests and 
-checks the formatting of the code. This way we prevent broken code to enter the
-stable branch.
-
-\section{Development}
 \section{Architecture}
 Most compilers are divided into two parts: the front-end and the back-end. The
 front-end is the part of the compilers that takes the source code and transforms
 it into an intermediate representation than will later be transformed into the
 actual machine code by the back-end. In our case, since we are using LLVM, we
 don't need to worry too much about the back-end, since LLVM will be in charge of
-generating the machine code. Out job will be to go from the source code to the
+generating the machine code. Our job will be to go from the source code to the
 LLVM intermediate representation (we will call it \textbf{\textit{IR}} from now
 on). The front-end of the compiler is typically composed of three main steps.
 
@@ -614,17 +780,19 @@ the IR example we saw):
 \texttt{\%nom = icmp sgt i32 \%a, \%b}
 
 \section{Results}
+\texttt{TODO: Benchamarks}
+
 \section{Conclusions}
+\texttt{TODO}
 
 \begin{thebibliography}{11}
 
-\bibitem{llvmtut} \textit{LLVM Kaleidoscope Tutorial: Implementing a Language with LLVM}. Accessed the 25th of october, 2022, from \url{https://llvm.org/docs/tutorial}
-\bibitem{llvm4plc} Rathi, M. \textit{A complete guide to LLVM for programming language creators}. Mukuls Blogs. Accedit el 2 de Novembre, 2022, des de \\\url{https://mukulrathi.com/create-your-own-programming-language/llvm-ir-cpp-api-tutorial}
-\bibitem{ci} Nystrom, R. \textit{Crafting Interpreters}. Publicat Juliol, 2021. ISBN 0990582930.
-\bibitem{mhlctllvm} \textit{Mapping High Level Constructs to LLVM IR}. Accedit el 20 d'octubre, 2022 des de \\\url{https://mapping-high-level-constructs-to-llvm-ir.readthedocs.io/en/latest/README.html}
-\bibitem{inkwell} \textit{Inkwell Documentation}. Accedit el 4 d'octubre, 2022 des de \\\url{https://thedan64.github.io/inkwell/inkwell/index.html}
-\bibitem{compilergo} Ball, T. \textit{Writing A Compiler In Go}. Publicat Agost, 2018. ISBN 398201610X.
-\bibitem{lea} LEA, x86 Instruction Set Reference. Accedit el 18 de desembre, 2022 \\\url{https://c9x.me/x86/html/file_module_x86_id_153.html}
+\bibitem{llvmtut} \textit{LLVM Kaleidoscope Tutorial: Implementing a Language with LLVM}. Accessed the 25th of October 2022, from \url{https://llvm.org/docs/tutorial}
+\bibitem{llvm4plc} Rathi, M. \textit{A complete guide to LLVM for programming language creators}. Mukuls Blogs. Accessed the 2nd of November 2022, from \\\url{https://mukulrathi.com/create-your-own-programming-language/llvm-ir-cpp-api-tutorial}
+\bibitem{ci} Nystrom, R. \textit{Crafting Interpreters}. Published July 2021. ISBN 0990582930.
+\bibitem{mhlctllvm} \textit{Mapping High Level Constructs to LLVM IR}. Accessed the 20th of October 2022 from \\\url{https://mapping-high-level-constructs-to-llvm-ir.readthedocs.io/en/latest/README.html}
+\bibitem{inkwell} \textit{Inkwell Documentation}. Accessed the 4th of October 2022 from \\\url{https://thedan64.github.io/inkwell/inkwell/index.html}
+\bibitem{compilergo} Ball, T. \textit{Writing A Compiler In Go}. Published August 2018. ISBN 398201610X.
 
 \end{thebibliography}
 

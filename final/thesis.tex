@@ -39,9 +39,11 @@
 {\large\sffamily\scshape\bfseries}
 {\textbf{\thesection}}{1em}{}
 
+\raggedbottom
+
 \begin{document}
 
-\fancyhead[LO]{\scriptsize AUTOR: TÍTOL DEL TREBALL}
+\fancyhead[LO]{\scriptsize JOSEP M. DOMINGO CATAFAL: Design and implementation of a programming language with LLVM}
 \fancyhead[RO]{\thepage}
 \fancyhead[LE]{\thepage}
 \fancyhead[RE]{\scriptsize EE/UAB TFG INFORMÀTICA: Design and implementation of a programming language with LLVM}
@@ -69,12 +71,12 @@
 \parbox{0.915\textwidth}
 {\sffamily
 
-    \textbf{Abstract--} This thesis presents the design and development of a new
+    \textbf{Abstract--} This article presents the design and development of a new
     programming language called \textit{Craft}, using Rust and LLVM. The goal of
     the project is to gain a deeper understanding of how compilers work by
     creating one from scratch using these tools. The language is designed to be
     simple and easy to understand, but at the same time, it aims to be fast and
-    efficient, so some sacrifices have to be made. The thesis covers the design
+    efficient, so some sacrifices have to be made. The article covers the design
     and implementation of the language, including the lexer, parser, and code
     generation. The project also includes a discussion of the challenges
     encountered during development and suggestions for future work. Overall, the
@@ -87,13 +89,13 @@
 
     \bigskip
 
-    \textbf{Resum--} Aquesta tesi presenta el disseny i desenvolupament d'un nou
+    \textbf{Resum--} Aquesta article presenta el disseny i desenvolupament d'un nou
     llenguatge de programació anomenat \textit{Craft}, utilitzant Rust i LLVM.
     L'objectiu del projecte és aconseguir una comprensió més profunda de com
     funcionen els compiladors creant-ne un des de zero amb aquestes eines. El
     llenguatge està dissenyat per ser senzill i fàcil d'entendre, però al mateix
     temps, pretén ser ràpid i eficient, per la qual cosa s'han de fer alguns
-    sacrificis. La tesi cobreix el disseny i la implementació del llenguatge,
+    sacrificis. La article cobreix el disseny i la implementació del llenguatge,
     incloent-hi el lexer, el parser i la generació de codi. El projecte també
     inclou una discussió sobre els reptes trobats durant el desenvolupament i
     suggeriments per a treballs futurs. En general, el projecte serveix com una
@@ -123,24 +125,25 @@ language's efficiency, and create slower programs. Another reason that allows
 speeding up the development is dynamic typing, as it frees the user from the
 mental overhead that comes with deciding the type that should be used. But this
 comes with its own disadvantages, since it is very likely that you will
-encounter runtime errors unless you use something like a static analyzer. These
-languages tend to be interpreted in order to save the programmer the time it
-takes to recompile the program, but it has an impact on the runtime
-performance of the program if we compare it to compiled languages. Python, for
-example, would be one of the largest representatives of this group of languages.
-On the other hand we have languages like C, which have almost no abstraction and
-the programmer must be aware of what he is doing in every line of code he
-writes. They are languages that provide very good performance, but slow down the
-development, as the programmer must take into account many low-level concepts.
-An additional problem is that when managing memory manually, it opens the door
-to a lot of runtime errors in the form of memory leaks and segmentation faults.
-Currently, there are languages like Rust that solve these memory management
-issues without losing performance, but the development is still slow (maybe even
-slower) and the compilation time long. These languages tend to be strongly
-typed, which helps reduces runtime errors.
+encounter runtime errors unless you use something like a static analyzer, and
+even then errors can be frequent. These languages tend to be interpreted in
+order to save the programmer the time it takes to recompile the program, but it
+has an impact on the runtime performance of the program if we compare it to
+compiled languages. Python, for example, would be one of the largest
+representatives of this group of languages. On the other hand we have languages
+like C, which have almost no abstraction and the programmer must be aware of
+what the computer is doing in every line of code he writes. They are languages
+that provide very good performance, but slow down the development, as the
+programmer must take into account many low-level concepts. An additional problem
+is that when managing memory manually, it opens the door to a lot of runtime
+errors in the form of memory leaks and segmentation faults. Currently, there are
+languages like Rust that solve these memory management issues without losing
+performance, but the development is still slow (maybe even slower) and the
+compilation time long. These languages tend to be strongly typed, which helps
+reduces runtime errors.
 
-In this thesis we will explore the different types of programming languages, and
-we will implement a simple programming language that aims to find balance 
+In this article we will explore the different types of programming languages,
+and we will implement a simple programming language that aims to find balance
 between the different trade-offs we talked about.
 
 \section{State of the art}
@@ -187,9 +190,8 @@ another, some languages that we could call functional are Haskell (being one of
 the purest), OCaml, Clojure, Scala or Lisp, between others.
 
 \subsubsection{Logic}
-Logic programming is a programming paradigm that is based on formal logic. Their
-reasoning is similar to the SQL database language. Some examples of logic
-programming languages include Prolog or Datalog.
+Logic programming is a programming paradigm that is based on formal logic. 
+Some examples of logic programming languages include Prolog or Datalog.
 
 \subsubsection{Scripting}
 Scripting languages are languages that are aimed to writing scripts and small
@@ -247,48 +249,44 @@ There's another breed of compiled languages, like for example Java, that
 compile to bytecode, an intermediate instruction set, and then use a Virtual 
 Machine that compiles Just In Time (JIT) the bytecode to machine code.
 
-In the case of Craft, it's implemented as a compiler using LLVM, since we are
-looking for fast runtimes, and we also want a strong type system paired with
-compile time checks.
-
 % \subsection{Memory management}
 
 % \subsection{Compilers}
 
 \section{Goals}
 
-We can see that we have two very opposite philosophies: one seeks performance
-with the downside of a slow development, while the other prefers to speed up the
-development in exchange for slowing down execution. The aim of this project, is
-to create a programming language that sits in the middle of these two paradigms,
-making sacrifices on both sides.
+As we can see there's a lot of different paradigms with different goals and
+design choices that make them suitable for different things. The goal of this
+project is to design and implement a basic programming language that is simple
+to write and that can be used to write simple programs. The language philosophy
+will revolve around the following ideas:
 
-Sacrifices in development agility:
 \begin{itemize}
-     \item \textbf{Compiled}: It will be a compiled language, in order to obtain a
-         good performance and avoid run-time errors as much as possible. This 
-         will make development time slower, since the programmer will have to
-         recompile the code on every change. The bigger the project the more 
-         noticeable the slow-down will be.
+     \item \textbf{Compiled}: It will be a compiled language, in order to obtain
+         a good performance and avoid run-time errors as much as possible.
+         Compiled languages do a better job at catching programming errors.
      \item \textbf{Strongly typed}: Having a strong time system helps to avoid
          runtime errors, since a lot of the mistakes the programmer can make are
-         caught at compile time. They also help document the code, making it 
-         easier to understand what it's doing. The downsides are that they may 
-         make the code more verbose and create a mental overhead when writing 
-         the code and having to think of the type to use (even though this could
-         also be seen as a good thing since it makes the developer more
-         conscious of what he's doing).
-     \item \textbf{Immutability}: Will try to force immutability whenever
-         possible, in order to avoid side effects, and to facilitate debugging.
+         caught at compile time. They also help document the code, making it
+         easier to understand what it's doing. The downsides are that they may
+         make the code more verbose and, sometimes, create a mental overhead
+         when prototyping since the programmer has to think of the type to use.
+         For bigger projects, though, this last downside usually disappears,
+         since dynamic typing will also create a mental overhead when reading
+         the code and trying to figure out the type of a variable.
+     \item \textbf{Immutability}: Immutability will be enforced by default in 
+         order to avoid side effects, and to facilitate debugging. The user can
+         still decide to make a variable mutable, but it has to be a conscious
+         choice and not a given.
 \end{itemize}
 
-Sacrifices in execution performance
-\begin{itemize}
-     \item \textbf{Automatic memory management}: The user will not have to worry
-         about deleting the memory manually. In its current state, only stack 
-         memory can be used. But the goal is to also allow heap memory usage,
-         and the memory will be automatically freed using a garbage collector.
-\end{itemize}
+The new language doesn't aim to be an innovation, but rather a collection of
+ideas grabbed from other popular languages mixed together. The end goal is to
+learn about the internals of programming languages and better understand the
+design choices behind them. The language will be implemented using Rust and LLVM
+(more on that later), offering an opportunity to gain familiarity with LLVM, one
+of the most used technologies in the industry of compiler development, and to
+tackle a significant project from the ground up with Rust.
 
 \section{Methodology}
 Writing a compiler involves several steps. First, even though not strictly part
@@ -312,7 +310,7 @@ It's also important to divide the languages into subsets, since this way we
 can start testing it. We don't need to implement all the features in the lexer,
 then in the parser, etc. We can implement the basic functionality in all the 
 steps, and then start again on the lexer and add a new feature and so on. In the
-case of this thesis it was also important, since there's no time nor resources
+case of this project it was also important, since there's no time nor resources
 to implement all the features, so only a subset of features of the original 
 design was implemented.
 
@@ -320,13 +318,16 @@ design was implemented.
 For version control Git was chosen since it's the industry standard and one of
 the most powerful tools out there. The repo is hosted on GitHub which is great
 for open source projects and allows us to use GitHub Actions, which run certain
-actions we define on GitHub servers for free.
+automated tasks we define on GitHub servers for free.
 
 \subsection{Quality Assurance}
 Apart from the implementation of the compiler itself, it's also important to 
 test that it's actually working properly. To do that a test suit was developed,
-which consists of a few Craft programs that are compiled and executed. Then 
-the output of the program is checked and if it's not valid the test fails.
+which consists of a few Craft programs, each testing different functionalities 
+of the language, that are compiled and executed. Then the output of the program 
+is checked and if it's not valid the test fails. This helps detect if any 
+feature was broken during development, or if some edge cases were not taken into
+consideration.
 
 Additionally, to leverage the features GitHub offers, a GitHub Action is run 
 every time a Pull Request is opened. GitHub Actions, allow us to compile the 
@@ -335,6 +336,13 @@ code follows the style guide. If any of these steps fails, the Pull Request
 cannot be merged to the main branch. This way we make sure that only working 
 code (at least according to the test cases we defined) is merged into the stable 
 branch.
+
+The usual workflow when developing a new feature, would be to create a new
+branch, work on the code, and once done, a Pull Request to the master branch
+would be opened. Then the GitHub Actions would trigger, check everything is 
+working as expected, and the code is formatted correctly. I would also review 
+the code, and, if everything is correct, the Pull Request would be merged into
+master.
 
 \section{Language Design}
 
@@ -360,9 +368,39 @@ let four = 2 + 2; // type inferred to be an integer
 let four = 2.0 + 2.0; // type inferred to be float
 \end{code}
 
+Variables are \textbf{immutable by default}, which means that once initialized
+their value cannot be changed. They act like constants that can be initialized
+at runtime. If the variable needs to be mutated, it can, but only by adding the
+keyword \textit{mut} after \textit{let}. So for example the following snippet
+would fail to compile:
+
+\begin{code}
+    fn main() {
+        let i = 0;
+        while i < 5 {
+            i = i + 1; // compile error, variable is not mutable!
+        }
+    }
+\end{code}
+
+\begin{code}
+    fn main() {
+        let mut i = 0;
+        while i < 5 {
+            i = i + 1; // compiles just fine, variable is mutable
+        }
+    }
+\end{code}
+
+This design choice comes from the idea that a lot of bugs come from 
+mutating variables when we don't actually want to. By making them immutable by
+default, the user has to make the conscious choice of telling the compiler that
+he/she wants to mutate the variable. This way, if he/she mutates a variable he/
+she didn't intend to mutate, the compiler will catch it.
+
 \subsection{Primitive types}
-By default Craft comes with some built-in (primitive), data types. This are the
-following:
+By default, Craft comes with some built-in (primitive), data types. These are
+the following:
 
 \begin{itemize}
     \item i64: 64 bit integer
@@ -399,10 +437,17 @@ They can be used like so:
 \begin{code}
     if a > b {
         // do stuff
+    } else if a == b {
+        // do other stuff
     } else {
         // do other stuff
     }
 \end{code}
+
+Notice that in both if and while statements, parenthesis around the conditional 
+expression are not necessary. They can still be used if the programmer desires
+but the idiomatic way to do it is without parenthesis since it's easier to read 
+and to type.
 
 \subsection{Expressions and statements}
 Craft is an expression based language, which means that most constructs in the
@@ -422,11 +467,12 @@ statements, but expressions. We can do something like this:
     let max = if a >= b { a } else { b };
 \end{code}
 
-In the code snippets we are assigning the value returned from the if expression
-to a variable. We can do that, because the last item in each of the branches of
-the if expression is returning an expression (of the same type). Whenever the
-last thing of a code block does not contain a semicolon, it means that block
-will return the value of evaluating that expression. So this actually works: 
+In the code snippet above we are assigning the value returned from the if
+expression to a variable. We can do that, because the last item in each of the
+branches of the if expression is returning an expression (of the same type in
+both branches, else it's a compile time error). Whenever the last thing of a
+code block does not contain a semicolon, it means that block will return the
+value of evaluating that expression. So this actually works: 
 
 \begin{code}
     let two = {
@@ -457,6 +503,9 @@ If we were to add a semicolon to any of the return expressions on the previous
 functions, we would get a compilation error, since we would turn the expressions
 into statements, and the function would not return anything.
 
+It's important to note that if expressions \textbf{must} have an else branch,
+since a value always has to be returned from the expression.
+
 \subsubsection{Examples of expressions}
 \begin{code}
 // function calls
@@ -473,8 +522,9 @@ x > y
 
 \subsubsection{Examples of statements}
 \begin{code}
-let a = 2 + 2; // variable declaration
+let a = 2 + 2;  // variable declaration
 while true {  } // loops
+if a > b { printf("hello world"); } // ifs without return expr.
 \end{code}
 
 \subsection{Data structures}
@@ -497,8 +547,6 @@ When creating an instance of a struct we do it the following way:
         age: 27,
     };
 \end{code}
-
-\subsection{Immutability}
 
 \subsection{Naming conventions}
 In Craft function and variable names are written in snake\_case. It's 
@@ -562,8 +610,10 @@ dead code elimination, constant folding, loop unrolling, etc. However, in order
 for LLVM to perform these optimizations, we will have to generate the code in
 SSA (Static single-assignment). This means that we can only assign a value to a
 variable once. If we need to reassign a value, a new variable has to be created
-that replaces the other one. The reason SSA is used is because it makes 
-applying optimizations a lot easier.
+that replaces the other one. The reason SSA is used is that it makes applying
+optimizations a lot easier.
+
+We will explore LLVM in more detail later in the article.
 
 \section{Architecture}
 Most compilers are divided into two parts: the front-end and the back-end. The
@@ -573,7 +623,9 @@ actual machine code by the back-end. In our case, since we are using LLVM, we
 don't need to worry too much about the back-end, since LLVM will be in charge of
 generating the machine code. Our job will be to go from the source code to the
 LLVM intermediate representation (we will call it \textbf{\textit{IR}} from now
-on). The front-end of the compiler is typically composed of three main steps.
+on). The front-end of the compiler is typically composed of four main steps:
+lexical analysis (implemented by the lexer), syntactic analysis (implemented by
+the parser), semantic analysis and the intermediate code generation.
 
 \begin{figure}[ht]
 \centering
@@ -753,12 +805,19 @@ idiomatic Rust interface to the LLVM API. Under the hood it calls the C++ API
 by using FFI (Foreign Function Interface).
 
 The API is made of several entities. The most fundamental one is the
-\texttt{BasicBlock}, which represents the blocks that we find inside a function,
-i.e. the set of instructions we find within a label. If we group a bunch of
-BasicBlocks, we have an entity call \texttt{Function}, which, you guess it 
-represents a function in the IR. And by grouping a bunch of functions we get the
-\texttt{Module} entity. As you may notice these entities represent the different
-parts that we saw when we talked about the IR.
+\textbf{\textit{BasicBlock}}, which represents the blocks that we find inside a
+function, i.e. the set of instructions we find within a label. If we group a
+bunch of BasicBlocks, we have an entity call \textbf{\textit{Function}}, which,
+you guess it represents a function in the IR. And by grouping a bunch of
+functions we get the \textbf{\textit{Module}} entity. As you may notice these
+entities represent the different parts that we saw when we talked about the IR.
+
+\begin{figure}[ht]
+\centering
+\captionsetup{justification=centering,margin=1cm}
+\includegraphics[width=0.75\linewidth]{llvm-blocks}
+\caption{Overview of the different building blocks of LLVM}
+\end{figure}
 
 Another important entity is \texttt{Context}. We just need and instance of it, 
 and it will keep track of the state of the compilation.
@@ -780,9 +839,73 @@ the IR example we saw):
 \texttt{\%nom = icmp sgt i32 \%a, \%b}
 
 \section{Results}
-\texttt{TODO: Benchamarks}
+The aim of this bachelor's thesis was to develop a programming language using
+Rust and LLVM. The language was designed to incorporate basic features such as
+if statements, while loops, functions, structs, and arrays.
 
-\section{Conclusions}
+The implementation of the language was carried out using Rust as the primary
+programming language and LLVM as the compiler infrastructure. The use of Rust
+allowed for the development of a performant and efficient language, with a nice
+user expirience, while LLVM provided the necessary tools for code optimization
+and generation.
+
+The final result of the project is a functioning programming language that
+includes the aforementioned features and can be used to write and execute basic
+programs. The implementation of if statements, while loops, functions, structs,
+and arrays was successful, and the language was able to perform as expected.
+
+With the compiler as of today, we can write programs like the following:
+
+\begin{code}
+struct ComplexNum {
+    real:      f64
+    imaginary: f64
+}
+
+fn add(x: ComplexNum, y: ComplexNum) ComplexNum {
+    ComplexNum!{
+        real: x.real + y.real,
+        imaginary: x.imaginary + y.imaginary,
+    }
+}
+
+fn multiply(x: ComplexNum, y: ComplexNum) ComplexNum {
+    ComplexNum!{
+        real: x.real * y.real - x.imaginary * y.imaginary,
+        imaginary: x.real * y.imaginary + x.imaginary * y.real,
+    }
+}
+
+fn main() {
+    let x = ComplexNum!{ 
+        real: 1.0,
+        imaginary: 2.0,
+    };
+
+    let y = ComplexNum!{ 
+        real: 3.0,
+        imaginary: 4.0,
+    };
+
+    let mut z = add(x, y);
+    printf("The sum of x and y is %f + %fi\n", z.real, z.imaginary);
+
+    z = multiply(x, y);
+    printf("The product of x and y is %f + %fi\n", z.real, z.imaginary);
+}
+\end{code}
+
+Furthermore, the project provided an opportunity to gain experience in using
+Rust and LLVM, as well as to gain a deeper understanding of the design and
+implementation of programming languages. The combination of Rust and LLVM proved
+to be a powerful tool for language development and allowed for the creation of a
+high-quality and efficient language.
+
+In conclusion, the project was a success in terms of the development of a
+functioning programming language with basic features and in terms of the
+learning experience it provided.
+
+\section{Conclusions and future work}
 \texttt{TODO}
 
 \begin{thebibliography}{11}
@@ -799,44 +922,6 @@ the IR example we saw):
 \appendix
 
 \section*{Apèndix}
-
-\begin{code}
-struct ComplexNumber {
-    real:      f64
-    imaginary: f64
-}
-
-fn add(x: ComplexNumber, y: ComplexNumber) ComplexNumber {
-    ComplexNumber!{
-        real: x.real + y.real,
-        imaginary: x.imaginary + y.imaginary,
-    }
-}
-
-fn multiply(x: ComplexNumber, y: ComplexNumber) ComplexNumber {
-    ComplexNumber!{
-        real: x.real * y.real - x.imaginary * y.imaginary,
-        imaginary: x.real * y.imaginary + x.imaginary * y.real,
-    }
-}
-
-fn main() {
-    let x = ComplexNumber!{
-        real: 1.0,
-        imaginary: 2.0,
-    };
-    let y = ComplexNumber!{
-        real: 3.0,
-        imaginary: 4.0,
-    };
-
-    let z = add(x, y);
-    printf("The sum of x and y is %f + %fi\n", z.real, z.imaginary);
-
-    z = multiply(x, y);
-    printf("The product of x and y is %f + %fi\n", z.real, z.imaginary);
-}
-\end{code}
 
 \setcounter{section}{1}
 

@@ -12,6 +12,7 @@
 \usepackage{listings, ../common/listings-rust}
 \usepackage[hyphens]{url}
 \usepackage{hyperref}
+\usepackage[hang,flushmargin]{footmisc}
 
 \graphicspath{ {img/} }
 
@@ -28,12 +29,9 @@
 \title{\Huge{\sffamily  Design and implementation of a programming language with LLVM }}
 \date{}
 
-\newcommand\blfootnote[1]{%
-  \begingroup
-  \renewcommand\thefootnote{}\footnote{#1}%
-  \addtocounter{footnote}{-1}%
-  \endgroup
-}
+\makeatletter
+\def\blfootnote{\xdef\@thefnmark{}\@footnotetext}
+\makeatother
 
 \titleformat{\section}
 {\large\sffamily\scshape\bfseries}
@@ -77,11 +75,12 @@
     creating one from scratch using these tools. The language is designed to be
     simple and easy to understand, but at the same time, it aims to be fast and
     efficient, so some sacrifices have to be made. The article covers the design
-    and implementation of the language, including the lexer, parser, and code
-    generation. The project also includes a discussion of the challenges
-    encountered during development and suggestions for future work. Overall, the
-    project serves as a valuable learning experience for understanding the inner
-    workings of compilers and the capabilities of Rust and LLVM.
+    and implementation of the language, including the lexer, parser, semantic
+    analysis, and code generation. The project also includes a discussion of the
+    challenges encountered during development and suggestions for future work.
+    Overall, the project serves as a valuable learning experience for
+    understanding the inner workings of compilers and the capabilities of Rust
+    and LLVM.
 
     \bigskip
 
@@ -89,18 +88,18 @@
 
     \bigskip
 
-    \textbf{Resum--} Aquesta article presenta el disseny i desenvolupament d'un nou
-    llenguatge de programació anomenat \textit{Craft}, utilitzant Rust i LLVM.
-    L'objectiu del projecte és aconseguir una comprensió més profunda de com
+    \textbf{Resum--} Aquest article presenta el disseny i desenvolupament d'un
+    nou llenguatge de programació anomenat \textit{Craft}, utilitzant Rust i
+    LLVM. L'objectiu del projecte és aconseguir una millor comprensió de com
     funcionen els compiladors creant-ne un des de zero amb aquestes eines. El
     llenguatge està dissenyat per ser senzill i fàcil d'entendre, però al mateix
     temps, pretén ser ràpid i eficient, per la qual cosa s'han de fer alguns
-    sacrificis. La article cobreix el disseny i la implementació del llenguatge,
-    incloent-hi el lexer, el parser i la generació de codi. El projecte també
-    inclou una discussió sobre els reptes trobats durant el desenvolupament i
-    suggeriments per a treballs futurs. En general, el projecte serveix com una
-    valuosa experiència d'aprenentatge per comprendre el funcionament intern
-    dels compiladors i les capacitats de Rust i LLVM.
+    sacrificis. L'article cobreix el disseny i la implementació del llenguatge,
+    incloent-hi el lexer, el parser, l'anàlisi semàntica i la generació de codi.
+    El projecte també inclou una discussió sobre els reptes trobats durant el
+    desenvolupament i suggeriments per a treballs futurs. En general, el
+    projecte serveix com una valuosa experiència d'aprenentatge per comprendre
+    el funcionament intern dels compiladors i les capacitats de Rust i LLVM.
 
     \bigskip
 
@@ -111,10 +110,10 @@
 \bigskip
 \end{@twocolumnfalse}]
 
-\blfootnote{$\bullet$ E-mail de contacte: jdomingocatafal@gmail.com}
+\blfootnote{$\bullet$ Contact E-mail: jdomingocatafal@gmail.com}
 \blfootnote{$\bullet$ Menció realitzada: Computació}
-\blfootnote{$\bullet$ Treball tutoritzat per: Javier Sanchez Pujadas (Ciències de la Computació)}
-\blfootnote{$\bullet$ Curs 2022/23}
+\blfootnote{$\bullet$ Tutorized by: Javier Sanchez Pujadas (Ciències de la Computació)}
+\blfootnote{$\bullet$ Year 2022/23}
 
 \section{Introduction} \lettrine[lines=3]{H}{istorically}, there has always been
 a dilemma between the speed of execution, and speed of development. Some
@@ -192,13 +191,6 @@ the purest), OCaml, Clojure, Scala or Lisp, between others.
 \subsubsection{Logic}
 Logic programming is a programming paradigm that is based on formal logic. 
 Some examples of logic programming languages include Prolog or Datalog.
-
-\subsubsection{Scripting}
-Scripting languages are languages that are aimed to writing scripts and small
-programs that try to solve a very specific problem, like automating a task. They
-are also embedded in other programs, to allow the user to add or modify
-functionality of it by writing scripts. Some popular scripting languages are 
-Python, Lua and command languages like Bash or Fish.
 
 \subsection{Implementations}
 There are different ways to implement a programming language. One is by writing
@@ -278,6 +270,9 @@ will revolve around the following ideas:
          order to avoid side effects, and to facilitate debugging. The user can
          still decide to make a variable mutable, but it has to be a conscious
          choice and not a given.
+    \item \textbf{Easy to use}: The language has to be easy to use, giving a 
+        script-like feeling but with the benefits of a compiled strongly-typed
+        language.
 \end{itemize}
 
 The new language doesn't aim to be an innovation, but rather a collection of
@@ -343,6 +338,13 @@ would be opened. Then the GitHub Actions would trigger, check everything is
 working as expected, and the code is formatted correctly. I would also review 
 the code, and, if everything is correct, the Pull Request would be merged into
 master.
+
+\begin{figure}[ht]
+\centering
+\captionsetup{justification=centering,margin=1cm}
+\includegraphics[width=\linewidth]{ci-pr-success}
+\caption{Screenshot of a Pull Request where all checks finished successfully}
+\end{figure}
 
 \section{Language Design}
 
@@ -506,6 +508,16 @@ into statements, and the function would not return anything.
 It's important to note that if expressions \textbf{must} have an else branch,
 since a value always has to be returned from the expression.
 
+Since blocks return values they can also be used for grouping expressions. For
+example, we can change the precedence of arithmetic operations using blocks:
+
+\begin{code}
+    let a =  2 * { 3 + 2 }; // a will equal 10
+\end{code}
+
+What the previous code does is evaluate 2, then evaluate the block which returns
+5 and then multiply both expressions.
+
 \subsubsection{Examples of expressions}
 \begin{code}
 // function calls
@@ -527,6 +539,24 @@ while true {  } // loops
 if a > b { printf("hello world"); } // ifs without return expr.
 \end{code}
 
+\subsection{Return statements}
+We talked about blocks returning values by leaving the last expression without
+semicolon. So if we want a function to return a value we just leave the last
+expression of the function without semicolon, and it will be returned. But what
+if you need to return earlier, maybe based on some condition. For those cases
+there's the return statement, which instantly returns from the function when
+called. It can be invoked with the \textbf{\textit{ret}} keyword. For example,
+when implementing a recursive Fibonacci, we could do it like so:
+
+\begin{code}
+fn fib(n: i64) i64 {
+    if n <= 1 {
+        ret n;
+    }
+    fib(n - 1) + fib(n - 2)
+}
+\end{code}
+
 \subsection{Data structures}
 We talked about some primitive data types, but that's not always enough to model
 more complex programs. That's why we can define custom data structures using 
@@ -546,6 +576,15 @@ When creating an instance of a struct we do it the following way:
         name: "Tux",
         age: 27,
     };
+\end{code}
+
+\subsection{Print statements}
+In order to print to stdout with craft the printf statement can be used. It
+works the same way as printf in C (it actually calls libc under the hood).
+
+\begin{code}
+    let x = 2 + 2;
+    printf("This is 2 + 2 => %d\n", x);
 \end{code}
 
 \subsection{Naming conventions}
@@ -634,7 +673,7 @@ the parser), semantic analysis and the intermediate code generation.
 \caption{Diagram showing the compilation workflow of a Craft program}
 \end{figure}
 
-\subsection{Lexing} 
+\subsection{Lexer} 
 This step consists of breaking the source code into a sequence of tokens. A
 token is a basic building block of the languages, such as a keyword or an
 identifier.
@@ -663,7 +702,7 @@ the case we want to add a reserved word, or add a new rule that detects a new
 symbol for example.
 
 
-\subsection{Parsing}
+\subsection{Parser}
 The lexer allowed us to identify the simbols of the program, but it does not 
 allow us to determine if their order is correct, or if they follow the rules of
 the language (i.e. it's grammatically correct). That is the job of the parser.
@@ -678,11 +717,10 @@ rules that tells us how to form valid strings of tokens in a specific language.
 They are formed of a set of symbols, which can be divided into terminal and
 non-terminal symbols, and a set of production rules that specify how the
 non-terminal symbols can be replaced by sequences of terminal and non-terminal
-symbols. A context free grammar is a type of grammar that, the rules of the grammar do
-not depend on the context in which the symbols appear.
+symbols. A context free grammar is a type of grammar which rules do not depend
+on the context in which the symbols appear.
 
 The goal of the parser is to make the program obey the rules of the grammar.
-
 Here's an example of a simple grammar for parsing function prototypes:
 
 \begin{small}
@@ -796,13 +834,13 @@ to be able to solve this types of problems.
 
 \subsubsection{LLVM API}
 
-It's important to understand the LLVM IR, but generating all of that code by 
+It's important to understand the LLVM IR, but generating all of that code by
 hand is a lot of work and it would require us to put a lot of infrastructure in
 place. Fortunately for us, LLVM comes with a C++ API, that makes generating the
-IR a lot easier. There's the little problem that we are not using C++, but 
-thankfully, there's a Rust library called Inkwell, that offers a comfortable and 
-idiomatic Rust interface to the LLVM API. Under the hood it calls the C++ API
-by using FFI (Foreign Function Interface).
+IR a lot easier. But there's a little problem, we are not using C++. Thankfully,
+there's a Rust library called Inkwell\cite{inkwell}, that offers a comfortable
+and idiomatic Rust interface to the LLVM API. Under the hood it calls the C++
+API by using FFI (Foreign Function Interface).
 
 The API is made of several entities. The most fundamental one is the
 \textbf{\textit{BasicBlock}}, which represents the blocks that we find inside a
@@ -869,29 +907,65 @@ fn add(x: ComplexNum, y: ComplexNum) ComplexNum {
     }
 }
 
-fn multiply(x: ComplexNum, y: ComplexNum) ComplexNum {
-    ComplexNum!{
-        real: x.real * y.real - x.imaginary * y.imaginary,
-        imaginary: x.real * y.imaginary + x.imaginary * y.real,
-    }
-}
-
 fn main() {
-    let x = ComplexNum!{ 
+    let x = ComplexNum!{
         real: 1.0,
         imaginary: 2.0,
     };
 
-    let y = ComplexNum!{ 
+    let y = ComplexNum!{
         real: 3.0,
         imaginary: 4.0,
     };
 
-    let mut z = add(x, y);
-    printf("The sum of x and y is %f + %fi\n", z.real, z.imaginary);
+    let z = add(x, y);
+    printf("x + y = %f + %fi\n", z.real, z.imaginary);
+}
+\end{code}
 
-    z = multiply(x, y);
-    printf("The product of x and y is %f + %fi\n", z.real, z.imaginary);
+Or this which prints an approximation of the Mandelbrot set:
+
+\begin{code}
+fn mandelbrot(a: f64, b: f64) f64 {
+    let mut za = 0.0;
+    let mut zb = 0.0;
+
+    let mut i = 0;
+
+    while i < 50 {
+        za = (za*za - zb*zb) + a;
+        zb = (za*zb + za*zb) + b;
+        i = i+1;
+    }
+
+    za*za + zb*zb
+}
+
+fn main() {
+    let xstart = -2.0;
+    let xend = 0.5;
+    let ystart = 1.0;
+    let yend = -1.0;
+
+    let xstep = 0.0315;
+    let ystep = -0.05;
+
+    let mut x = xstart;
+    let mut y = ystart;
+
+    while y > yend {
+        x = xstart;
+        while x < xend {
+            if mandelbrot(x, y) < 4.0 {
+                printf("x");
+            } else {
+                printf(" ");
+            }
+            x = x + xstep; 
+        }
+        printf("\n");
+        y = y + ystep;
+    }
 }
 \end{code}
 
@@ -906,7 +980,34 @@ functioning programming language with basic features and in terms of the
 learning experience it provided.
 
 \section{Conclusions and future work}
-\texttt{TODO}
+The development of a programming language is a long and arduous process. It
+requires the work of a lot of very good engineers, and a lot of time. The goal
+of this project was not to create a production ready language packed with
+features and an extensive standard library, but rather to create a simple
+language with the basic functionality to make something useful. It was a project
+to learn about the internals of compilers and programming language design. And I
+think the goal was accomplished. We have a simple language that allows us to
+create programs that actually run. However, there are many opportunities for
+future work and improvement, since, as stated, it takes a long time to develop a
+good language:
+
+\begin{itemize}
+    \item \textbf{New features}: The language presented in this paper, is very
+        limited. It would be interesting to add new features such as for loops
+        with ranges, a pipe operator similar to the one in Elixir, list 
+        comprehension like in Python, and many more features that would make 
+        the development process a lot more pleasant.
+    \item \textbf{Modules}: As of now, all code has to go on one file, there's
+        no way to import code from another one. A module system has to be 
+        designed and implemented in order to allow it.
+    \item \textbf{Error handling mechanism}: Currently there's no way to handle
+        errors. An error handling mechanism has to be put in place. The idea
+        would be to use something similar to the error handling mechanism in 
+        Rust, rather than exceptions, since it gives the code linearity, and 
+        they have to be explicitly handled on each case.
+    \item \textbf{Tooling}: Some extra tooling like a formatter or a linter
+        could be included with the compiler.
+\end{itemize}
 
 \begin{thebibliography}{11}
 
@@ -925,10 +1026,7 @@ learning experience it provided.
 
 \setcounter{section}{1}
 
-\subsection{Secció d'Apèndix}
-.... ... ..... ... ..... ... ... ..... .... .
-
-\subsection{Secció d'Apèndix}
-.... ... ..... ... ..... ... ... ..... .... .
+\subsection{Output of the Mandelbrot set program}
+\includegraphics[width=\linewidth]{mandelbrot}
 
 \end{document}

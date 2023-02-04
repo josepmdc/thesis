@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <style type="text/css">
+        * {
+            background: #eee;
+            color: #333
+        }
+
+        html {
+            padding: 2em 0 2em 0;
+        }
+
+        body {
+            font-family: Courier, monospace;
+            max-width: 85ex;
+            margin: auto;
+            text-align: justify;
+        }
+
+        a {
+            color: #000
+        }
+
+        pre {
+            line-height: normal;
+            background-color: #282828;
+            color: #ebdbb2;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto
+        }
+
+        ol {
+            font-size: 20px;
+        }
+    </style>
+    <title>
+        TFG - Disseny i implementació d'un llenguatge de programació en LLVM
+    </title>
+</head>
+
+<body>
+    <nav>
+        <a href="index.html">Índex</a>
+        |
+        <a href="manual.html">Manual</a>
+        |
+        <a href="https://github.com/josepmdc/craft" target="blank">Repo GitHub</a>
+    </nav>
+    <div id="main">
+        <h1>Manual d'usuari</h1>
+        <h2>Requisits</h2>
+        <p>Per tal d'utilitzar el compilador és necessari tenir instal·lat Rust i la versió 14 de LLVM.</p>
+        <p><b>NOTA:</b> El compilador només s'ha provat amb Linux. Desconeixo si funciona amb Windows o MacOS. Les
+            instruccions d'aquest document són per a sistemes operatius GNU/Linux.</p>
+
+        <h2>Com compilar el projecte</h2>
+        Primer s'ha de clonar el repositori de Git:
+        <pre>git clone https://github.com/josepmdc/craft.git</pre>
+
+        A continuació entrem en el directori del projecte:
+        <pre>cd craft</pre>
+
+        Si tens més d'una versió de LLVM instal·lada, especifica la ruta on es troba LLVM instal·lat de la següent forma
+        (la ruta pot ser diferent, aquesta és la ruta en el meu sistema ArchLinux, en altres distros pot variar):
+        <pre>export LLVM_SYS_140_PREFIX=/usr/lib/llvm14</pre>
+
+        I compilem:
+        <pre>cargo build --release</pre>
+
+        Aixó compilarà el projecte i creara un binari a la carpeta 'target/release'. El podem executar de la forma
+        següent:
+        <pre>./target/release/craft &lt;fitxer a compilar&gt;</pre>
+
+        Les opcions que té el compilador les podem veure amb el flag '--help':
+
+        <pre>
+            The Craft Programming Language
+
+            craft &lt;file&gt; [options]
+            Options:
+            -l display lexer output
+            -p display AST
+            -c display generated code
+        </pre>
+
+        L'altre opció és fer-ho directament amb cargo run:
+        <pre>cargo run &lt;fitxer a compilar&gt;</pre>
+
+        Això compilarà el projecte i l'executarà.
+    </div>
+</body>
+
+</html>

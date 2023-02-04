@@ -149,9 +149,9 @@ between the different trade-offs we talked about.
 A programming language resembles, in a way, a natural language, and like natural
 languages, there's a lot of different ones with different properties. We mainly
 have two different ways to classify them: by paradigm and by how they are
-implemented. The paradigm allows us to classify based on their features and the
-way we write programs with them. It tells us something about the design of the
-language. On the other hand we have the implementation which tells us
+implemented. The paradigm allows us to classify them based on their features and
+the way we write programs with them. It tells us something about the design of
+the language. On the other hand we have the implementation which tells us
 information about how the programs are run. About how the code we write turns
 into instructions the CPU can execute. A programming language can have many
 implementations, but there's usually one that is the "official" one, and that's
@@ -171,14 +171,16 @@ program, we specify step by step what the computer has to do. Imperative
 programming is often implemented as procedural programming, a subtype in which
 statements are structured into procedures (also known as functions). Most of
 the programming languages we use nowadays can fit into this category, including
-C/C++, Java, C\#, Go, Lua, JavaScript, etc.
+C, C++, Java, C\#, Go, Lua, JavaScript, etc.
 
 \subsubsection{Object-oriented}
-It's a subtype of imperative and procedural programming, in which data and
-behavior is grouped in units called objects. These objects hold data, and they
-can be modified by functions known as methods. The main representatives of this
-paradigm are languages like Java, C\# or C++. These languages represent objects
-using classes and have many abstractions like inheritance and polymorphism.
+It's usually considered a subtype of imperative and procedural programming, even
+though there are languages in other paradigms that are also object-oriented. In
+object-oriented programming, data and behavior is grouped in units called
+objects. These objects hold data, and they can be modified by functions known as
+methods. The main representatives of this paradigm are languages like Java, C\#
+or C++. These languages represent objects using classes and have many
+abstractions like inheritance and polymorphism.
 
 \subsubsection{Functional}
 Functional programming has the idea of treating computation as the evaluation of
@@ -193,8 +195,8 @@ Logic programming is a programming paradigm that is based on formal logic.
 Some examples of logic programming languages include Prolog or Datalog.
 
 \subsection{Implementations}
-There are different ways to implement a programming language. One is by writing
-a compiler and the other one is by writing an interpreter. Both have it's
+Programming languages can be implemented in different ways, but they generally
+fall into two main categories: compilers and interpreters. Both have it's
 upsides and it's downsides, and usually, depending on the design of the
 programming language and its goals, one may be a better option than the other.
 
@@ -211,10 +213,10 @@ On the other hand, they offer a good developer experience, specially for
 prototyping or writing quick scripts. That's because you don't have to wait for
 the compiler to generate the code, you can just run it and make modifications to
 the program while it's running, without the need to restart it. They can also be
-embedded into other programs and be used to script the beahaviour of that
-program. An example of that are game engines, that are usually written in a
-compiled languages like C++, but they integrate a scripting language for all the
-gameplay development.
+embedded into other programs and be used to script the behavior of that program.
+An example of that are game engines, that are usually written in a compiled
+languages like C++, but they integrate a scripting language for all the gameplay
+development.
 
 Some popular interpreted programming languages are Python, JavaScript, Lua or
 PHP. These are some of the most popular languages altogether, and that's
@@ -230,16 +232,22 @@ valid in order to generate the machine code. This comes with a downside that is
 that it slows down development time, since we need to recompile the code on
 every change before we can run it.
 
-Some popular compiled programming languages nowadays are C/C++, Go or Rust.
+Some popular compiled programming languages nowadays are C, C++, Go or Rust.
 There are different ways these compilers are implemented. Some of them, like Go,
-generate all the machine code by themselves. But others, like Rust or C/C++ with
-the clang compiler, generate an intermediate representation, and then use LLVM
-to generate the machine code. This way they don't have to re-implement the code
-generation, they just use the one LLVM does.
+generate all the machine code by themselves. But others, like Rust or C/C++
+with the clang compiler, generate an intermediate representation, and then use
+LLVM (we will look into LLVM in more detail later on) to generate the machine
+code. This way they don't have to re-implement the code generation, they just
+use the one LLVM does.
 
-There's another breed of compiled languages, like for example Java, that
+There's another breed of compiled languages, like for example Java or C\#, that
 compile to bytecode, an intermediate instruction set, and then use a Virtual 
-Machine that compiles Just In Time (JIT) the bytecode to machine code.
+Machine that compiles Just In Time (JIT) the bytecode to machine code. These 
+languages have the benefit, that they have interoperability with other languages
+that use that same Virtual Machine. For example in the case of Java, it uses the
+JVM (Java Virtual Machine), and other languages like Kotlin or Clojure also use
+that same virtual machine, which makes them compatible with each other. Some 
+other examples are Erlang with Elixir or C\# with Visual Basic and F\#.
 
 % \subsection{Memory management}
 
@@ -249,9 +257,9 @@ Machine that compiles Just In Time (JIT) the bytecode to machine code.
 
 As we can see there's a lot of different paradigms with different goals and
 design choices that make them suitable for different things. The goal of this
-project is to design and implement a basic programming language that is simple
-to write and that can be used to write simple programs. The language philosophy
-will revolve around the following ideas:
+project is to design and implement a basic programming language that is
+user-friendly and that can be used to write simple programs. The language
+philosophy will revolve around the following ideas:
 
 \begin{itemize}
      \item \textbf{Compiled}: It will be a compiled language, in order to obtain
@@ -271,8 +279,8 @@ will revolve around the following ideas:
          still decide to make a variable mutable, but it has to be a conscious
          choice and not a given.
     \item \textbf{Easy to use}: The language has to be easy to use, giving a 
-        script-like feeling but with the benefits of a compiled strongly-typed
-        language.
+        scripting-like feeling but with the benefits of a compiled
+        strongly-typed language.
 \end{itemize}
 
 The new language doesn't aim to be an innovation, but rather a collection of
@@ -309,7 +317,7 @@ case of this project it was also important, since there's no time nor resources
 to implement all the features, so only a subset of features of the original 
 design was implemented.
 
-\section{Git and GitHub}
+\subsection{Git and GitHub}
 For version control Git was chosen since it's the industry standard and one of
 the most powerful tools out there. The repo is hosted on GitHub which is great
 for open source projects and allows us to use GitHub Actions, which run certain
@@ -348,6 +356,17 @@ master.
 
 \section{Language Design}
 
+\subsection{Primitive types}
+By default, Craft comes with some built-in (primitive), data types. These are
+the following:
+
+\begin{itemize}
+    \item i64: 64 bit integer
+    \item f64: 64 bit float
+    \item string: array of characters
+    \item bool: boolean
+\end{itemize}
+
 \subsection{Start of the program}
 The starting point of craft programs is at the main function.
 
@@ -357,9 +376,17 @@ fn main() {
 }
 \end{code}
 
-As you can see in the above snippet, functions are declared with the fn keyword,
-followed by its name, and  the parameters between parenthesis (in this case it 
-has no parameters).
+\subsection{Functions}
+As you can see from the previous snippet, functions are declared with the fn
+keyword, followed by its name, and  the parameters between parenthesis. The
+parameters are declared by specifing the identifier, followed by a colon and the
+type of the parameter. The return type comes after the closing parenthesis of
+the parameters. The braces that suround the body of the function are always
+mandatory.
+
+\begin{code}
+    fn something(a: i64, b: i64) i64 { ... }
+\end{code}
 
 \subsubsection{Variable declaration}
 Variables are declared with the keyword \texttt{let}. The type of the variable
@@ -385,6 +412,8 @@ would fail to compile:
     }
 \end{code}
 
+The correct way to do it would be like this:
+
 \begin{code}
     fn main() {
         let mut i = 0;
@@ -399,17 +428,6 @@ mutating variables when we don't actually want to. By making them immutable by
 default, the user has to make the conscious choice of telling the compiler that
 he/she wants to mutate the variable. This way, if he/she mutates a variable he/
 she didn't intend to mutate, the compiler will catch it.
-
-\subsection{Primitive types}
-By default, Craft comes with some built-in (primitive), data types. These are
-the following:
-
-\begin{itemize}
-    \item i64: 64 bit integer
-    \item f64: 64 bit float
-    \item string: array of characters
-    \item bool: boolean
-\end{itemize}
 
 \subsection{Loops and control flow}
 The way to repeat instructions multiple times in Craft is by using while loops.
@@ -449,17 +467,17 @@ They can be used like so:
 Notice that in both if and while statements, parenthesis around the conditional 
 expression are not necessary. They can still be used if the programmer desires
 but the idiomatic way to do it is without parenthesis since it's easier to read 
-and to type.
+and type.
 
 \subsection{Expressions and statements}
 Craft is an expression based language, which means that most constructs in the
 language are expressions. An expression is a valid unit of code that evaluates
-to a value. So for example, 2+2 is an expression, since it's a unit of code that
-evaluates to a value (4 in this case). On the other hand we have statements,
-which don't evaluate to a value. For example, (\texttt{let a = 2+2;} is a
-statement that contains the 2 + 2 expression, but the value is captured by the
-variable 'a', thus it's not returned, and it becomes a statement. Usually
-statements end in semicolon, except special cases like for example loops.
+to a value. So for example, 2+2 is an expression, since it evaluates to a value
+(4 in this case). On the other hand we have statements, which don't evaluate to
+a value. For example, (\texttt{let a = 2+2;} is a statement that contains the 2
++ 2 expression, but the value is captured by the variable 'a', thus it's not
+returned, and it becomes a statement. Usually statements end in semicolon,
+except special cases like for example loops.
 
 So when we said that Craft is expression based, it means that pretty much
 everything returns a value. For example if statements, are not actually
@@ -488,7 +506,7 @@ value of evaluating that expression. So this actually works:
 \end{code}
 
 The block ends in an expression without semicolon, thus it returns the value of
-evaluating the expression (4) and assigns that to the variable. This works for 
+evaluating that expression (4) and assigns that to the variable. This works for 
 functions too:
 
 \begin{code}
@@ -505,8 +523,10 @@ If we were to add a semicolon to any of the return expressions on the previous
 functions, we would get a compilation error, since we would turn the expressions
 into statements, and the function would not return anything.
 
-It's important to note that if expressions \textbf{must} have an else branch,
-since a value always has to be returned from the expression.
+It's important to note that \textit{if} expressions \textbf{must} have an else
+branch, since a value always has to be returned from the expression. If it's 
+used as a statement (it doesn't return a value), then it's fine to have only the
+\textit{if} branch.
 
 Since blocks return values they can also be used for grouping expressions. For
 example, we can change the precedence of arithmetic operations using blocks:
@@ -561,6 +581,7 @@ fn fib(n: i64) i64 {
 We talked about some primitive data types, but that's not always enough to model
 more complex programs. That's why we can define custom data structures using 
 structs. Structs work the same way they do in other languages like C or Rust.
+We declare them like so:
 
 \begin{code}
 struct User {
@@ -576,6 +597,33 @@ When creating an instance of a struct we do it the following way:
         name: "Tux",
         age: 27,
     };
+\end{code}
+
+\subsection{Arrays}
+Craft has support for arrays. They are fixed size and the can be declared like
+so:
+
+\begin{code}
+let a = [1, 2, 3] i64;
+\end{code}
+
+The type annotations for an array follow the pattern \texttt{[type; size]}. 
+For example, when decalring a function that takes an int array as a parameter 
+and returns that same array:
+
+\begin{code}
+fn do_nothing(arr: [i64; 3]) [i64; 3] {
+    arr
+}
+\end{code}
+
+Whenever we want to access an element of an array we use square brackets with 
+the index of the element we want to access. Arrays in Craft are zero indexed, 
+meaning the index of the first element is 0.
+
+\begin{code}
+let a = [1, 2, 3] i64;
+let b = 2 + a[0]; // b = 3
 \end{code}
 
 \subsection{Print statements}
@@ -597,9 +645,6 @@ Writing a compiler does not require many tools, but some of them can help a lot
 in paving the road. For this compiler we are going to mainly use two tools: 
 The Rust Programming Language and LLVM.
 
-We are also going to use two tools for managing the source code: Git with GitHub
-for hosting.
-
 \subsection{Rust}
 Rust is a systems programming language that was first released in 2010. It was
 developed by the Mozilla Foundation with the goal of creating a safe and
@@ -608,7 +653,7 @@ tasks, such as operating systems, and performance critical programs, like a
 browser engine. One of the major features of the language is it's guaranteed
 memory-safety (and thread-safety) without requiring the use of a garbage
 collector or reference counting (and thus not compromising on performance).
-This combined with its powerful type system, help catch a lot of bugs at 
+This combined with its powerful type system, helps catch a lot of bugs at 
 compile-time.
 
 For this reason we are going to use this language. It's also really comfortable
@@ -617,18 +662,16 @@ line tool used for compiling, managing dependencies, etc. and clippy, a linter
 that comes built in and gives great hints on how to improve the code.
 
 \subsection{LLVM}
-LLVM is a tool chain for building compilers, i.e. a set of tools different ones
-that help us in implementing compilers. It was created in 2003 by Chris Lattner
-(also creator of the Swift programming language) and has the support of
-companies like Apple (LLVM is a part integral part of XCode and Swift for iOS
-application development), Google, IBM or Intel. Currently, there are several
-mainstream programming languages that use it, such as C/C++ (via the Clang
-compiler, a alternative to GCC), Rust, Swift, Crystal...
+LLVM is a toolchain for building compilers, i.e. a set of tools that help us
+implementing compilers. It was created in 2003 by Chris Lattner (also creator of
+the Swift programming language) and has the support of companies like Apple
+(LLVM is a part integral part of XCode and Swift for iOS application
+development), Google, IBM or Intel. Currently, there are several mainstream
+programming languages that use it, such as C and C++ (via the Clang compiler),
+Rust, Swift, Crystal...
 
 As we said LLVM has a lot of tools, but among all them, the LLVM Core libraries
-are the most important and particularly relevant for us. 
-
-We will be referring to 
+are the most important and particularly relevant for us. We will be referring to 
 them as LLVM from now on for simplicity. 
 
 LLVM will allow us to generate assembly for a lot of different architectures
@@ -640,17 +683,17 @@ the assembly for the target architecture will be generated.
 
 Generating LLVM IR instead of assembly, also frees us from some headaches. For
 example, since LLVM is architecture independent, when we generate the code, we
-don't we need to worry about the number of registers, as we have an unlimited
+don't need to worry about the number of registers, as we have an unlimited
 number of virtual registers, which LLVM will later map to the registers of the
 corresponding architecture.
 
 As we discussed, LLVM also applies optimizations to the generated code, like
 dead code elimination, constant folding, loop unrolling, etc. However, in order
 for LLVM to perform these optimizations, we will have to generate the code in
-SSA (Static single-assignment). This means that we can only assign a value to a
-variable once. If we need to reassign a value, a new variable has to be created
-that replaces the other one. The reason SSA is used is that it makes applying
-optimizations a lot easier.
+SSA form (Static Single-Assignment). This means that we can only assign a value
+to a variable once. If we need to reassign a value, a new variable has to be
+created that replaces the other one. The reason SSA is used is that it makes
+applying optimizations a lot easier.
 
 We will explore LLVM in more detail later in the article.
 
@@ -678,15 +721,17 @@ This step consists of breaking the source code into a sequence of tokens. A
 token is a basic building block of the languages, such as a keyword or an
 identifier.
 
-A lexer can be implemented rather easily, by using a state machine. An approach
-to do it programmatically could be the following:
+A lexer can be implemented using an external lexical analyzer, but in our case
+it will be implement by hand, since the goal is to learn how it works. 
+Implementing a lexer from scratch is actually really simple. It works the 
+following way:
 
 \begin{enumerate}
     \item Start by reading the source code character by character until we reach
         the end.
     \item If the character by itself forms a valid sequence (e.g. a parenthesis)
         we create a token from it. If it doesn't, we continue reading characters
-        until we find a valid sequence. 
+        until we find a valid sequence and then create the token.
 \end{enumerate}
 
 Note that sometimes we may find a valid sequence, but that's not enough to
@@ -710,9 +755,9 @@ the language (i.e. it's grammatically correct). That is the job of the parser.
 The parser takes the sequence of tokens obtained from the lexer and
 transforms it into an Abstract Syntax Tree (AST). This tree represents the
 structure of the program and determines its syntactic structure. It will tell us
-the order in which we need to execute the instruction.
+the order in which we need to execute the instructions.
 
-To generate the AST compilers use a context free grammar. A grammar is a set of
+To generate the AST, compilers use a context free grammar. A grammar is a set of
 rules that tells us how to form valid strings of tokens in a specific language.
 They are formed of a set of symbols, which can be divided into terminal and
 non-terminal symbols, and a set of production rules that specify how the

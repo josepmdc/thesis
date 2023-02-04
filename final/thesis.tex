@@ -20,10 +20,8 @@
 {
     \scriptsize
     \noindent
-    \minipage{\linewidth} 
-    \vspace{0.5\baselineskip}
     \lstset{language=Rust, style=colouredRust,#1}}
-{\endminipage}
+{}
 
 \author{\LARGE\sffamily Josep Maria Domingo Catafal}
 \title{\Huge{\sffamily  Design and implementation of a programming language with LLVM }}
@@ -271,9 +269,9 @@ philosophy will revolve around the following ideas:
          easier to understand what it's doing. The downsides are that they may
          make the code more verbose and, sometimes, create a mental overhead
          when prototyping since the programmer has to think of the type to use.
-         For bigger projects, though, this last downside usually disappears,
-         since dynamic typing will also create a mental overhead when reading
-         the code and trying to figure out the type of a variable.
+         For bigger projects, though, this last downside is usually also present
+         with dynamic typing, since dynamic typing will create a mental overhead
+         when reading the code and trying to figure out the type of a variable.
      \item \textbf{Immutability}: Immutability will be enforced by default in 
          order to avoid side effects, and to facilitate debugging. The user can
          still decide to make a variable mutable, but it has to be a conscious
@@ -777,6 +775,14 @@ Here's an example of a simple grammar for parsing function prototypes:
 \end{verbatim}
 \end{small}
 
+In the example above, the things between the \texttt{'<>'} are the productions,
+and the things to the right of '::=' tell us how that rule is formed. For
+example the proto production tells us that the prototype of a function is formed
+by placing the fn keyword followed by an identifier (which is defined by the
+\texttt{<id>} production), an opening parenthesis, the params (defined by the
+\texttt{<params>} production) and a closing parenthesis. The curly braces 
+indicate that the contents they surround can be repeated zero or more times. 
+
 If we were to translate the proto rule to code, it would look something like 
 this:
 
@@ -815,12 +821,22 @@ fn parse_prototype() -> (Prototype, Err) {
 Once we have an AST, we can traverse it to generate the LLVM IR. Since this is a
 simple compiler, we are going to do the semantic analysis in this step. With 
 more complex compilers, we may want to create a specific step of semantic 
-analysis, but in out case it is not necessary.
+analysis, but in our case it is not necessary.
 
 LLVM has the concept of modules. A module contains all the information
 associated with one code file. If we have multiple files, we simply have to
 create different modules and link them. Modules contain functions and functions
-are made up of instructions, similar to the instructions we find in assembly.
+are made up of blocks. Blocks are defined by specifying a label. These labels
+are like assembly labels, they define sections within out code, and we can use
+them to make jumps to the different sections. Blocks are made up of
+instructions, similar to the instructions we find in assembly.
+
+\begin{figure}[ht]
+\centering
+\captionsetup{justification=centering,margin=1cm}
+\includegraphics[width=0.65\linewidth]{llvm-blocks}
+\caption{Overview of the different building blocks of LLVM}
+\end{figure}
 
 Let's see an example of a small piece of code and what it would look like in the
 intermediate representation of LLVM. We have the following function that
@@ -853,8 +869,7 @@ end:
 \end{code}
 
 The first line of the previous code defines a function, which receives two
-32 bits integers. A label entry is defined below. These tags are like assembly
-tags, and we can jump to them.
+32 bits integers. A label entry is defined below.
 
 The first thing it does, on the 'entry' tag, is comparing both integers (i.e.
 the if condition). The \texttt{'sgt'} keyword, means 'signed greater than',
@@ -874,15 +889,16 @@ conditional again in the \texttt{end} block? Couldn't we assign the value of
 \texttt{retval} directly inside the branch \texttt{btrue} or \texttt{bfalse} and
 spare us that third conditional? Well the answer is no, because then we would be
 generating code that is not in SSA form. And as we mentioned earlier, LLVM
-requires the generated code to be in SSA form. And that's why phi nodes exist,
-to be able to solve this types of problems.
+requires the generated code to be in SSA form (we would be assigning the value
+to \%retval in two different places). And that's why phi nodes exist, to be able
+to solve this kind of problem.
 
 \subsubsection{LLVM API}
 
 It's important to understand the LLVM IR, but generating all of that code by
 hand is a lot of work and it would require us to put a lot of infrastructure in
-place. Fortunately for us, LLVM comes with a C++ API, that makes generating the
-IR a lot easier. But there's a little problem, we are not using C++. Thankfully,
+place. Fortunately, LLVM comes with a C++ API, that makes generating the IR a
+lot easier. But there's a little problem, we are not using C++. Thankfully,
 there's a Rust library called Inkwell\cite{inkwell}, that offers a comfortable
 and idiomatic Rust interface to the LLVM API. Under the hood it calls the C++
 API by using FFI (Foreign Function Interface).
@@ -895,22 +911,16 @@ you guess it represents a function in the IR. And by grouping a bunch of
 functions we get the \textbf{\textit{Module}} entity. As you may notice these
 entities represent the different parts that we saw when we talked about the IR.
 
-\begin{figure}[ht]
-\centering
-\captionsetup{justification=centering,margin=1cm}
-\includegraphics[width=0.75\linewidth]{llvm-blocks}
-\caption{Overview of the different building blocks of LLVM}
-\end{figure}
-
-Another important entity is \texttt{Context}. We just need and instance of it, 
+Another important entity is \textit{\textbf{Context}}. We just need and instance of it, 
 and it will keep track of the state of the compilation.
 
-Finally we have the \texttt{Builder} entity, which is the one in charge of 
+Finally, we have the \textit{\textbf{Builder}} entity, which is the one in charge of 
 actually generating the code. For example, if we want to generate a comparison,
-like the one we saw on the IR example, we would call the \texttt{Builder}, 
-telling it which instruction to generate:
+like the one we saw on the IR example, we would call the \textit{Builder}, 
+telling it which instruction to generate:\\
 
 \texttt{Builder.CreateICmpSGT(a, b, "some-name")}
+\\
 
 The first two parameters are the two values being compared. The third 
 indicates the name of the generated variable (we can give it any name we want,
@@ -928,9 +938,8 @@ if statements, while loops, functions, structs, and arrays.
 
 The implementation of the language was carried out using Rust as the primary
 programming language and LLVM as the compiler infrastructure. The use of Rust
-allowed for the development of a performant and efficient language, with a nice
-user expirience, while LLVM provided the necessary tools for code optimization
-and generation.
+allowed for a pleasant development experience and a fast compiler, while LLVM 
+provided the necessary tools for code optimization and generation.
 
 The final result of the project is a functioning programming language that
 includes the aforementioned features and can be used to write and execute basic
@@ -1014,15 +1023,12 @@ fn main() {
 }
 \end{code}
 
+The output of this program can be found on the appendix \ref{appendix:a}.
+
 Furthermore, the project provided an opportunity to gain experience in using
 Rust and LLVM, as well as to gain a deeper understanding of the design and
 implementation of programming languages. The combination of Rust and LLVM proved
-to be a powerful tool for language development and allowed for the creation of a
-high-quality and efficient language.
-
-In conclusion, the project was a success in terms of the development of a
-functioning programming language with basic features and in terms of the
-learning experience it provided.
+to be a powerful combination for developing a compiler.
 
 \section{Conclusions and future work}
 The development of a programming language is a long and arduous process. It
@@ -1065,13 +1071,15 @@ good language:
 
 \end{thebibliography}
 
+\newpage
 \appendix
 
-\section*{Apèndix}
+\section*{Appendix}
 
 \setcounter{section}{1}
 
 \subsection{Output of the Mandelbrot set program}
+\label{appendix:a}
 \includegraphics[width=\linewidth]{mandelbrot}
 
 \end{document}

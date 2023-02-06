@@ -82,7 +82,7 @@
 
     \bigskip
 
-    \textbf{Keywords-- } Programming Language, LLVM, SSA, Strongly Typed, Compiled
+    \textbf{Keywords-- } Programming Language, LLVM, Rust, SSA, Strongly Typed, Compiled
 
     \bigskip
 
@@ -101,7 +101,7 @@
 
     \bigskip
 
-    \textbf{Paraules clau-- } Llenguatge de programació, LLVM, SSA, Fortament tipat, Compilat
+    \textbf{Paraules clau-- } Llenguatge de programació, LLVM, Rust, SSA, Fortament tipat, Compilat
 }
 \end{center}
 
@@ -135,9 +135,9 @@ programmer must take into account many low-level concepts. An additional problem
 is that when managing memory manually, it opens the door to a lot of runtime
 errors in the form of memory leaks and segmentation faults. Currently, there are
 languages like Rust that solve these memory management issues without losing
-performance, but the development is still slow (maybe even slower) and the
+performance \cite{rustsafety}, but the development is still slow and the
 compilation time long. These languages tend to be strongly typed, which helps
-reduces runtime errors.
+reduce runtime errors.
 
 In this article we will explore the different types of programming languages,
 and we will implement a simple programming language that aims to find balance
@@ -232,11 +232,11 @@ every change before we can run it.
 
 Some popular compiled programming languages nowadays are C, C++, Go or Rust.
 There are different ways these compilers are implemented. Some of them, like Go,
-generate all the machine code by themselves. But others, like Rust or C/C++
-with the clang compiler, generate an intermediate representation, and then use
-LLVM (we will look into LLVM in more detail later on) to generate the machine
-code. This way they don't have to re-implement the code generation, they just
-use the one LLVM does.
+generate all the machine code by themselves \cite{gocodegen}. But others, like
+Rust or C/C++ with the clang compiler, generate an intermediate representation,
+and then use LLVM (we will look into LLVM in more detail later on) to generate
+the machine code \cite{rustllvm} \cite{clangllvm}. This way they don't have to re-implement the
+code generation, they just use the one LLVM does.
 
 There's another breed of compiled languages, like for example Java or C\#, that
 compile to bytecode, an intermediate instruction set, and then use a Virtual 
@@ -244,8 +244,10 @@ Machine that compiles Just In Time (JIT) the bytecode to machine code. These
 languages have the benefit, that they have interoperability with other languages
 that use that same Virtual Machine. For example in the case of Java, it uses the
 JVM (Java Virtual Machine), and other languages like Kotlin or Clojure also use
-that same virtual machine, which makes them compatible with each other. Some 
-other examples are Erlang with Elixir or C\# with Visual Basic and F\#.
+that same virtual machine, which makes them compatible with each other. This
+means that languages like Kotlin have access to the plethora of existing
+Java libraries \cite{kotlininterop}. Some other examples are Erlang with Elixir
+\cite{elixirinterop} or the .NET languages.
 
 % \subsection{Memory management}
 
@@ -359,10 +361,10 @@ By default, Craft comes with some built-in (primitive), data types. These are
 the following:
 
 \begin{itemize}
-    \item i64: 64 bit integer
-    \item f64: 64 bit float
-    \item string: array of characters
-    \item bool: boolean
+    \item \textbf{i64:} 64 bit integer
+    \item \textbf{f64:} 64 bit float
+    \item \textbf{string:} array of characters
+    \item \textbf{bool:} boolean
 \end{itemize}
 
 \subsection{Start of the program}
@@ -746,7 +748,7 @@ symbol for example.
 
 
 \subsection{Parser}
-The lexer allowed us to identify the simbols of the program, but it does not 
+The lexer allowed us to identify the symbols of the program, but it does not 
 allow us to determine if their order is correct, or if they follow the rules of
 the language (i.e. it's grammatically correct). That is the job of the parser.
 
@@ -1060,14 +1062,22 @@ good language:
         could be included with the compiler.
 \end{itemize}
 
+\vfill\null
+\columnbreak
 \begin{thebibliography}{11}
 
+\bibitem{ci} Nystrom, R. \textit{Crafting Interpreters}. Published July 2021. ISBN 0990582930.
+\bibitem{compilergo} Ball, T. \textit{Writing A Compiler In Go}. Published August 2018. ISBN 398201610X.
 \bibitem{llvmtut} \textit{LLVM Kaleidoscope Tutorial: Implementing a Language with LLVM}. Accessed the 25th of October 2022, from \url{https://llvm.org/docs/tutorial}
 \bibitem{llvm4plc} Rathi, M. \textit{A complete guide to LLVM for programming language creators}. Mukuls Blogs. Accessed the 2nd of November 2022, from \\\url{https://mukulrathi.com/create-your-own-programming-language/llvm-ir-cpp-api-tutorial}
-\bibitem{ci} Nystrom, R. \textit{Crafting Interpreters}. Published July 2021. ISBN 0990582930.
 \bibitem{mhlctllvm} \textit{Mapping High Level Constructs to LLVM IR}. Accessed the 20th of October 2022 from \\\url{https://mapping-high-level-constructs-to-llvm-ir.readthedocs.io/en/latest/README.html}
 \bibitem{inkwell} \textit{Inkwell Documentation}. Accessed the 4th of October 2022 from \\\url{https://thedan64.github.io/inkwell/inkwell/index.html}
-\bibitem{compilergo} Ball, T. \textit{Writing A Compiler In Go}. Published August 2018. ISBN 398201610X.
+\bibitem{kotlininterop} \textit{Calling Java from Kotlin}. Accessed the 6th of January 2023. \url{https://kotlinlang.org/docs/java-interop.html}
+\bibitem{elixirinterop} \textit{Erlang libraries from Elixir}. Accessed the 6th of January 2023. \url{https://elixir-lang.org/getting-started/erlang-libraries.html}
+\bibitem{gocodegen}Go compiler. \textit{Generating machine code}. Accessed the 6th of January 2023. \url{https://github.com/golang/go/blob/master/src/cmd/compile/README.md#7-generating-machine-code}
+\bibitem{rustllvm} Guide to Rustc development. \textit{Code generation}. Accessed the 6th of January 2023. \url{https://rustc-dev-guide.rust-lang.org/backend/codegen.html}
+\bibitem{clangllvm} Clang compiler. Accessed the 6th of January 2023. \url{https://clang.llvm.org}
+\bibitem{rustsafety} Stanford CS 242: Programming Languages. \textit{Memory safety in Rust}. Accessed the 6th of January 2023. \url{https://stanford-cs242.github.io/f18/lectures/05-1-rust-memory-safety.html}
 
 \end{thebibliography}
 

@@ -137,7 +137,7 @@ errors in the form of memory leaks and segmentation faults. Currently, there are
 languages like Rust that solve these memory management issues without losing
 performance \cite{rustsafety}, but the development is still slow and the
 compilation time long. These languages tend to be strongly typed, which helps
-reduce runtime errors.
+reduce runtime errors, since the compiler will catch them.
 
 In this article we will explore the different types of programming languages,
 and we will implement a simple programming language that aims to find balance
@@ -226,27 +226,29 @@ a specific CPU architecture. They usually have a better runtime performance than
 interpreters, since they generate optimized machine code for that specific
 architecture. Another good thing about compiled languages is that they can catch
 a lot of bugs at compile time, since they have to check weather the program is
-valid in order to generate the machine code. This comes with a downside that is
-that it slows down development time, since we need to recompile the code on
-every change before we can run it.
+valid in order to generate the machine code. This comes with the downside that
+it slows down development time, since we need to recompile the code on every
+change before we can run it. And with big projects, the compilation time can be
+significant.
 
 Some popular compiled programming languages nowadays are C, C++, Go or Rust.
 There are different ways these compilers are implemented. Some of them, like Go,
 generate all the machine code by themselves \cite{gocodegen}. But others, like
 Rust or C/C++ with the clang compiler, generate an intermediate representation,
 and then use LLVM (we will look into LLVM in more detail later on) to generate
-the machine code \cite{rustllvm} \cite{clangllvm}. This way they don't have to re-implement the
-code generation, they just use the one LLVM does.
+the machine code \cite{rustllvm} \cite{clangllvm}. This way they don't have to
+re-implement the code generation, they just use the one LLVM has, and take
+advantage of all the optimizations it offers.
 
 There's another breed of compiled languages, like for example Java or C\#, that
 compile to bytecode, an intermediate instruction set, and then use a Virtual 
 Machine that compiles Just In Time (JIT) the bytecode to machine code. These 
 languages have the benefit, that they have interoperability with other languages
 that use that same Virtual Machine. For example in the case of Java, it uses the
-JVM (Java Virtual Machine), and other languages like Kotlin or Clojure also use
-that same virtual machine, which makes them compatible with each other. This
-means that languages like Kotlin have access to the plethora of existing
-Java libraries \cite{kotlininterop}. Some other examples are Erlang with Elixir
+JVM (Java Virtual Machine), and other languages, like Kotlin or Clojure, also
+use that same virtual machine, which makes them compatible with each other. This
+means that languages like Kotlin have access to the plethora of existing Java
+libraries \cite{kotlininterop}. Some other examples are Erlang with Elixir
 \cite{elixirinterop} or the .NET languages.
 
 % \subsection{Memory management}
@@ -265,7 +267,7 @@ philosophy will revolve around the following ideas:
      \item \textbf{Compiled}: It will be a compiled language, in order to obtain
          a good performance and avoid run-time errors as much as possible.
          Compiled languages do a better job at catching programming errors.
-     \item \textbf{Strongly typed}: Having a strong time system helps to avoid
+     \item \textbf{Strongly typed}: Having a strong type system helps to avoid
          runtime errors, since a lot of the mistakes the programmer can make are
          caught at compile time. They also help document the code, making it
          easier to understand what it's doing. The downsides are that they may
@@ -302,9 +304,9 @@ Secondly we need to define the formal grammar for the language we designed. This
 will help us greatly when writing the parser. The grammar will tell us how the
 sentences of the language are built.
 
-Thirdly, we have the implementation steps, which are three. The lexer, the
-parser and the semantic analysis and code generation. We have to implement them
-in that order, since they depend on the steps made by the previous one.  We will
+Thirdly, we have the implementation steps, which are four. The lexer, the
+parser, the semantic analysis and code generation. We have to implement them in
+that order, since they depend on the work done by the previous step.  We will
 see later on with more detail what this steps involve. But for now, simply we
 know that, for every new feature we want to add to the language, we have to
 implement it in every one of these steps.
@@ -319,9 +321,9 @@ design was implemented.
 
 \subsection{Git and GitHub}
 For version control Git was chosen since it's the industry standard and one of
-the most powerful tools out there. The repo is hosted on GitHub which is great
-for open source projects and allows us to use GitHub Actions, which run certain
-automated tasks we define on GitHub servers for free.
+the most powerful tools out there. The repo is hosted on GitHub \cite{repo}
+which is great for open source projects and allows us to use GitHub Actions,
+which run certain automated tasks we define on GitHub servers for free.
 
 \subsection{Quality Assurance}
 Apart from the implementation of the compiler itself, it's also important to 
@@ -332,13 +334,15 @@ is checked and if it's not valid the test fails. This helps detect if any
 feature was broken during development, or if some edge cases were not taken into
 consideration.
 
-Additionally, to leverage the features GitHub offers, a GitHub Action is run 
-every time a Pull Request is opened. GitHub Actions, allow us to compile the 
-project, run the test suit, run a linter and check that the formatting of the 
-code follows the style guide. If any of these steps fails, the Pull Request
-cannot be merged to the main branch. This way we make sure that only working 
-code (at least according to the test cases we defined) is merged into the stable 
-branch.
+Additionally, to leverage the features GitHub offers, a GitHub Action is run
+every time a Pull Request is opened. GitHub Actions, allow us to automatically
+execute programs on GitHub servers when certain events are triggered on a repo.
+In the case of this project, it was configured to, whenever a Pull Request was
+opened, compile the project, run the test suite, run a linter and check that the
+formatting of the code follows the style guide. If any of these steps fails, the
+Pull Request cannot be merged to the main branch. This way we make sure that
+only working code (at least according to the test cases we defined) is merged
+into the stable branch.
 
 The usual workflow when developing a new feature, would be to create a new
 branch, work on the code, and once done, a Pull Request to the master branch
@@ -406,9 +410,7 @@ would fail to compile:
 \begin{code}
     fn main() {
         let i = 0;
-        while i < 5 {
-            i = i + 1; // compile error, variable is not mutable!
-        }
+        i = i + 1; // compile error, variable is not mutable!
     }
 \end{code}
 
@@ -417,21 +419,19 @@ The correct way to do it would be like this:
 \begin{code}
     fn main() {
         let mut i = 0;
-        while i < 5 {
-            i = i + 1; // compiles just fine, variable is mutable
-        }
+        i = i + 1; // compiles just fine, variable is mutable
     }
 \end{code}
 
 This design choice comes from the idea that a lot of bugs come from 
 mutating variables when we don't actually want to. By making them immutable by
 default, the user has to make the conscious choice of telling the compiler that
-he/she wants to mutate the variable. This way, if he/she mutates a variable he/
-she didn't intend to mutate, the compiler will catch it.
+he/she wants to mutate the variable. This way, if he/she mutates a variable that
+didn't intend to mutate, the compiler will catch it.
 
 \subsection{Loops and control flow}
 The way to repeat instructions multiple times in Craft is by using while loops.
-They can be used like so:
+They can be used like this:
 \begin{code}
     let i = 0;
     while i < 100 {
@@ -490,12 +490,13 @@ statements, but expressions. We can do something like this:
 In the code snippet above we are assigning the value returned from the if
 expression to a variable. We can do that, because the last item in each of the
 branches of the if expression is returning an expression (of the same type in
-both branches, else it's a compile time error). Whenever the last thing of a
-code block does not contain a semicolon, it means that block will return the
-value of evaluating that expression. So this actually works: 
+both branches, else it's a compile time error). Whenever the last expression in
+a code block (anything surrounded by curly braces) does not contain a semicolon,
+it means that block will return the value of evaluating that expression. So this
+actually works: 
 
 \begin{code}
-    let two = {
+    let four = {
         2 + 2
     };
 
@@ -535,8 +536,8 @@ example, we can change the precedence of arithmetic operations using blocks:
     let a =  2 * { 3 + 2 }; // a will equal 10
 \end{code}
 
-What the previous code does is evaluate 2, then evaluate the block which returns
-5 and then multiply both expressions.
+What the previous code does is: it evaluates 2, then evaluates the block which
+returns 5, and then multiplies both expressions.
 
 \subsubsection{Examples of expressions}
 \begin{code}
@@ -563,10 +564,10 @@ if a > b { printf("hello world"); } // ifs without return expr.
 We talked about blocks returning values by leaving the last expression without
 semicolon. So if we want a function to return a value we just leave the last
 expression of the function without semicolon, and it will be returned. But what
-if you need to return earlier, maybe based on some condition. For those cases
+if you need to return earlier, maybe based on some condition? For those cases
 there's the return statement, which instantly returns from the function when
 called. It can be invoked with the \textbf{\textit{ret}} keyword. For example,
-when implementing a recursive Fibonacci, we could do it like so:
+when implementing a recursive Fibonacci, we could do it like this:
 
 \begin{code}
 fn fib(n: i64) i64 {
@@ -581,7 +582,7 @@ fn fib(n: i64) i64 {
 We talked about some primitive data types, but that's not always enough to model
 more complex programs. That's why we can define custom data structures using 
 structs. Structs work the same way they do in other languages like C or Rust.
-We declare them like so:
+We declare them like this:
 
 \begin{code}
 struct User {
@@ -600,16 +601,15 @@ When creating an instance of a struct we do it the following way:
 \end{code}
 
 \subsection{Arrays}
-Craft has support for arrays. They are fixed size and the can be declared like
-so:
+Craft has support for arrays. They are fixed size and can be declared like this:
 
 \begin{code}
 let a = [1, 2, 3] i64;
 \end{code}
 
 The type annotations for an array follow the pattern \texttt{[type; size]}. 
-For example, when decalring a function that takes an int array as a parameter 
-and returns that same array:
+For example, when declaring a function that takes an int array of three elements
+as a parameter and returns that same array:
 
 \begin{code}
 fn do_nothing(arr: [i64; 3]) [i64; 3] {
@@ -627,7 +627,7 @@ let b = 2 + a[0]; // b = 3
 \end{code}
 
 \subsection{Print statements}
-In order to print to stdout with craft the printf statement can be used. It
+In order to print to stdout with Craft, the printf statement can be used. It
 works the same way as printf in C (it actually calls libc under the hood).
 
 \begin{code}
@@ -675,11 +675,12 @@ are the most important and particularly relevant for us. We will be referring to
 them as LLVM from now on for simplicity. 
 
 LLVM will allow us to generate assembly for a lot of different architectures
-without any extra effort. It can even generate Web Assembly, which allows us to
-run the language in modern web browsers. The Craft compiler will generate LLVM
-IR (Intermidiete Representation), and then it will be piped to LLVM, which will
-take the IR, apply transformations to it, in order to optimize it, and then
-the assembly for the target architecture will be generated.
+and apply many optimizations to the code without any extra effort. It can even
+generate Web Assembly, which allows us to run the language in modern web
+browsers. The Craft compiler will generate LLVM IR (Intermidiete
+Representation), and then it will be piped to LLVM, which will take the IR,
+apply transformations to it, in order to optimize it, and then the assembly for
+the target architecture will be generated.
 
 Generating LLVM IR instead of assembly, also frees us from some headaches. For
 example, since LLVM is architecture independent, when we generate the code, we
@@ -750,7 +751,7 @@ symbol for example.
 \subsection{Parser}
 The lexer allowed us to identify the symbols of the program, but it does not 
 allow us to determine if their order is correct, or if they follow the rules of
-the language (i.e. it's grammatically correct). That is the job of the parser.
+the language (i.e. it's syntactically correct). That is the job of the parser.
 
 The parser takes the sequence of tokens obtained from the lexer and
 transforms it into an Abstract Syntax Tree (AST). This tree represents the
@@ -770,10 +771,12 @@ Here's an example of a simple grammar for parsing function prototypes:
 
 \begin{small}
 \begin{verbatim}
+
 <proto>   ::= fn <id> "(" <params> ")"
 <id>      ::= letter {letter | digit | "_"}
 <params>  ::= "("{ <param> {, <param> } }")"
 <param>   ::= <id>: <type>
+
 \end{verbatim}
 \end{small}
 
@@ -784,9 +787,15 @@ by placing the fn keyword followed by an identifier (which is defined by the
 \texttt{<id>} production), an opening parenthesis, the params (defined by the
 \texttt{<params>} production) and a closing parenthesis. The curly braces 
 indicate that the contents they surround can be repeated zero or more times. 
+If the braces had quotes (i.e. "\{") then that would mean that we expect to have 
+an actual curly brace on the code.
 
-If we were to translate the proto rule to code, it would look something like 
-this:
+\vspace{10px}
+
+Translating the grammar to actual code is actually quite simple, it's almost a
+literal translation by implementing a recursive descent parser. If we were to
+translate the proto rule to code, it would look something like this:
+\vfill
 
 \begin{code}
 fn parse_prototype() -> (Prototype, Err) {
@@ -874,17 +883,18 @@ The first line of the previous code defines a function, which receives two
 32 bits integers. A label entry is defined below.
 
 The first thing it does, on the 'entry' tag, is comparing both integers (i.e.
-the if condition). The \texttt{'sgt'} keyword, means 'signed greater than',
-which, as the names says, does a greater than signed comparison. The result of
-the comparison is a one bit integer which acts like a boolean. If it's true, it
-will jump to the label \texttt{btrue}, otherwise to the label \texttt{bfalse}.
+the if condition). The \texttt{'sgt'} keyword \cite{sgt}, means 'signed greater
+than', which, as the name says, does a greater than signed comparison. The
+result of the comparison is a one bit integer which acts like a boolean. If it's
+true, it will jump to the label \texttt{btrue}, otherwise to the label
+\texttt{bfalse}.
 
 In this case the two branches do the same thing: a jump to the label
-\texttt{end}. There we come across a concept called phi nodes. The phi nodes
-are kind of an inverted if. Depending on where we did the jump we will assign
-one value or another to the variable \texttt{retval}. If we come from
-\texttt{btrue}, \texttt{retval} is assigned \texttt{\%a}, and if we come from 
-\texttt{bfalse} it is assigned to \texttt{\%b}.
+\texttt{end}. There we come across a concept called phi nodes \cite{phitutorial}.
+The phi nodes are kind of an inverted if. Depending on where we did the jump we
+will assign one value or another to the variable \texttt{retval}. If we come
+from \texttt{btrue}, \texttt{retval} is assigned \texttt{\%a}, and if we come
+from \texttt{bfalse} it is assigned to \texttt{\%b}.
 
 Now, why do the two branches jump to the \texttt{end} tag and then do a
 conditional again in the \texttt{end} block? Couldn't we assign the value of
@@ -892,8 +902,9 @@ conditional again in the \texttt{end} block? Couldn't we assign the value of
 spare us that third conditional? Well the answer is no, because then we would be
 generating code that is not in SSA form. And as we mentioned earlier, LLVM
 requires the generated code to be in SSA form (we would be assigning the value
-to \%retval in two different places). And that's why phi nodes exist, to be able
-to solve this kind of problem.
+to \%retval in two different places, which is not SSA form, if we weren't using
+Phi nodes). And that's why phi nodes exist, to be able to solve this kind of
+problem.
 
 \subsubsection{LLVM API}
 
@@ -980,6 +991,7 @@ fn main() {
 \end{code}
 
 Or this which prints an approximation of the Mandelbrot set:
+\newpage
 
 \begin{code}
 fn mandelbrot(a: f64, b: f64) f64 {
@@ -1062,23 +1074,27 @@ good language:
         could be included with the compiler.
 \end{itemize}
 
-\vfill\null
-\columnbreak
+\renewcommand\refname{Bibliography}
 \begin{thebibliography}{11}
-
 \bibitem{ci} Nystrom, R. \textit{Crafting Interpreters}. Published July 2021. ISBN 0990582930.
 \bibitem{compilergo} Ball, T. \textit{Writing A Compiler In Go}. Published August 2018. ISBN 398201610X.
-\bibitem{llvmtut} \textit{LLVM Kaleidoscope Tutorial: Implementing a Language with LLVM}. Accessed the 25th of October 2022, from \url{https://llvm.org/docs/tutorial}
-\bibitem{llvm4plc} Rathi, M. \textit{A complete guide to LLVM for programming language creators}. Mukuls Blogs. Accessed the 2nd of November 2022, from \\\url{https://mukulrathi.com/create-your-own-programming-language/llvm-ir-cpp-api-tutorial}
-\bibitem{mhlctllvm} \textit{Mapping High Level Constructs to LLVM IR}. Accessed the 20th of October 2022 from \\\url{https://mapping-high-level-constructs-to-llvm-ir.readthedocs.io/en/latest/README.html}
-\bibitem{inkwell} \textit{Inkwell Documentation}. Accessed the 4th of October 2022 from \\\url{https://thedan64.github.io/inkwell/inkwell/index.html}
-\bibitem{kotlininterop} \textit{Calling Java from Kotlin}. Accessed the 6th of January 2023. \url{https://kotlinlang.org/docs/java-interop.html}
-\bibitem{elixirinterop} \textit{Erlang libraries from Elixir}. Accessed the 6th of January 2023. \url{https://elixir-lang.org/getting-started/erlang-libraries.html}
-\bibitem{gocodegen}Go compiler. \textit{Generating machine code}. Accessed the 6th of January 2023. \url{https://github.com/golang/go/blob/master/src/cmd/compile/README.md#7-generating-machine-code}
-\bibitem{rustllvm} Guide to Rustc development. \textit{Code generation}. Accessed the 6th of January 2023. \url{https://rustc-dev-guide.rust-lang.org/backend/codegen.html}
-\bibitem{clangllvm} Clang compiler. Accessed the 6th of January 2023. \url{https://clang.llvm.org}
-\bibitem{rustsafety} Stanford CS 242: Programming Languages. \textit{Memory safety in Rust}. Accessed the 6th of January 2023. \url{https://stanford-cs242.github.io/f18/lectures/05-1-rust-memory-safety.html}
+\bibitem{llvmtut} \textit{LLVM Kaleidoscope Tutorial: Implementing a Language with LLVM}. Accessed the 25th of October 2022. Available at: \url{https://llvm.org/docs/tutorial}
+\bibitem{llvm4plc} Rathi, M. \textit{A complete guide to LLVM for programming language creators}. Mukuls Blogs. Accessed the 2nd of November 2022. Available at: \\\url{https://mukulrathi.com/create-your-own-programming-language/llvm-ir-cpp-api-tutorial}
+\bibitem{mhlctllvm} \textit{Mapping High Level Constructs to LLVM IR}. Accessed the 20th of October 2022. Available at: \\\url{https://mapping-high-level-constructs-to-llvm-ir.readthedocs.io/en/latest/README.html}
+\end{thebibliography}
 
+\renewcommand\refname{References}
+\begin{thebibliography}{11}
+\bibitem{kotlininterop} \textit{Calling Java from Kotlin}. Accessed the 6th of February 2023. Available at: \url{https://kotlinlang.org/docs/java-interop.html}
+\bibitem{elixirinterop} \textit{Erlang libraries from Elixir}. Accessed the 6th of February 2023. Available at: \url{https://elixir-lang.org/getting-started/erlang-libraries.html}
+\bibitem{repo} \textit{Craft Git Repository}. Accessed the 6th of February 2022. Available at: \\\url{https://github.com/josepmdc/craft}
+\bibitem{inkwell} \textit{Inkwell Documentation}. Accessed the 4th of October 2022. Available at: \\\url{https://thedan64.github.io/inkwell/inkwell/index.html}
+\bibitem{gocodegen}Go compiler. \textit{Generating machine code}. Accessed the 6th of February 2023. Available at: \url{https://github.com/golang/go/blob/master/src/cmd/compile/README.md#7-generating-machine-code}
+\bibitem{rustllvm} Guide to Rustc development. \textit{Code generation}. Accessed the 6th of February 2023. Available at: \url{https://rustc-dev-guide.rust-lang.org/backend/codegen.html}
+\bibitem{clangllvm} Clang compiler. Accessed the 6th of February 2023. Available at: \url{https://clang.llvm.org}
+\bibitem{rustsafety} Stanford CS 242: Programming Languages. \textit{Memory safety in Rust}. Accessed the 6th of February 2023. Available at: \url{https://stanford-cs242.github.io/f18/lectures/05-1-rust-memory-safety.html}
+\bibitem{sgt} LLVM Language Reference. \textit{icmp instruction}. Accessed the 7th of February 2022. Available at: \url{https://llvm.org/docs/LangRef.html#icmp-instruction}
+\bibitem{phitutorial} LLVM tutorial \textit{LLVM IR for if/then/else}. Accessed the 7th of February 2022. Available at: \url{https://llvm.org/docs/tutorial/MyFirstLanguageFrontend/LangImpl05.html#llvm-ir-for-if-then-else}
 \end{thebibliography}
 
 \newpage

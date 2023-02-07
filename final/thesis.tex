@@ -50,7 +50,7 @@
 {
    \fancyhf{}
    \fancyhead[L]{\scriptsize BACHELOR'S THESIS IN COMPUTER SCIENCE, ESCOLA D'ENGINYERIA (EE), UNIVERSITAT AUTÒNOMA DE BARCELONA (UAB)}
-   \fancyfoot[C]{\scriptsize Febrer de 2023, Escola d'Enginyeria (UAB)}
+   \fancyfoot[C]{\scriptsize February 2023, Escola d'Enginyeria (UAB)}
 }
 
 \renewcommand{\headrulewidth}{0pt}
@@ -433,7 +433,7 @@ didn't intend to mutate, the compiler will catch it.
 The way to repeat instructions multiple times in Craft is by using while loops.
 They can be used like this:
 \begin{code}
-    let i = 0;
+    let mut i = 0;
     while i < 100 {
         // do stuff
         i = i + 1;
@@ -912,7 +912,7 @@ that's why phi nodes exist, to be able to solve this kind of problem.
 \subsubsection{LLVM API}
 
 It's important to understand the LLVM IR, but generating all of that code by
-hand is a lot of work and it would require us to put a lot of infrastructure in
+hand is a lot of work, and it would require us to put a lot of infrastructure in
 place. Fortunately, LLVM comes with a C++ API, that makes generating the IR a
 lot easier. But there's a little problem, we are not using C++. Thankfully,
 there's a Rust library called Inkwell \cite{inkwell}, that offers a comfortable
@@ -953,14 +953,14 @@ Rust and LLVM. The language was designed to incorporate basic features such as
 if statements, while loops, functions, structs, and arrays.
 
 The implementation of the language was carried out using Rust as the primary
-programming language and LLVM as the compiler infrastructure. The use of Rust
+programming language and LLVM as the compiler back-end. The use of Rust
 allowed for a pleasant development experience and a fast compiler, while LLVM 
 provided the necessary tools for code optimization and generation.
 
 The final result of the project is a functioning programming language that
 includes the aforementioned features and can be used to write and execute basic
-programs. The implementation of if statements, while loops, functions, structs,
-and arrays was successful, and the language was able to perform as expected.
+programs. The implementation of the main features was successful, and the
+language was able to perform as expected.
 
 With the compiler as of today, we can write programs like the following:
 
@@ -1077,14 +1077,14 @@ good language:
 
 \renewcommand\refname{References}
 \begin{thebibliography}{11}
-\bibitem{sponsors} LLVM Foundation sponsors. Accessed the 7th of February 2023. Available at: \url{https://foundation.llvm.org/docs/sponsors/}
-\bibitem{kotlininterop} \textit{Calling Java from Kotlin}. Accessed the 6th of February 2023. Available at: \url{https://kotlinlang.org/docs/java-interop.html}
-\bibitem{elixirinterop} \textit{Erlang libraries from Elixir}. Accessed the 6th of February 2023. Available at: \url{https://elixir-lang.org/getting-started/erlang-libraries.html}
-\bibitem{repo} \textit{Craft Git Repository}. Accessed the 6th of February 2023. Available at: \\\url{https://github.com/josepmdc/craft}
+\bibitem{rustsafety} Stanford CS 242: Programming Languages. \textit{Memory safety in Rust}. Accessed the 6th of February 2023. Available at: \url{https://stanford-cs242.github.io/f18/lectures/05-1-rust-memory-safety.html}
 \bibitem{gocodegen}Go compiler. \textit{Generating machine code}. Accessed the 6th of February 2023. Available at: \url{https://github.com/golang/go/blob/master/src/cmd/compile/README.md#7-generating-machine-code}
 \bibitem{rustllvm} Guide to Rustc development. \textit{Code generation}. Accessed the 6th of February 2023. Available at: \url{https://rustc-dev-guide.rust-lang.org/backend/codegen.html}
 \bibitem{clangllvm} Clang compiler. Accessed the 6th of February 2023. Available at: \url{https://clang.llvm.org}
-\bibitem{rustsafety} Stanford CS 242: Programming Languages. \textit{Memory safety in Rust}. Accessed the 6th of February 2023. Available at: \url{https://stanford-cs242.github.io/f18/lectures/05-1-rust-memory-safety.html}
+\bibitem{kotlininterop} \textit{Calling Java from Kotlin}. Accessed the 6th of February 2023. Available at: \url{https://kotlinlang.org/docs/java-interop.html}
+\bibitem{elixirinterop} \textit{Erlang libraries from Elixir}. Accessed the 6th of February 2023. Available at: \url{https://elixir-lang.org/getting-started/erlang-libraries.html}
+\bibitem{repo} \textit{Craft Git Repository}. Accessed the 6th of February 2023. Available at: \\\url{https://github.com/josepmdc/craft}
+\bibitem{sponsors} LLVM Foundation sponsors. Accessed the 7th of February 2023. Available at: \url{https://foundation.llvm.org/docs/sponsors/}
 \bibitem{sgt} LLVM Language Reference. \textit{icmp instruction}. Accessed the 7th of February 2023. Available at: \url{https://llvm.org/docs/LangRef.html#icmp-instruction}
 \bibitem{phitutorial} LLVM tutorial \textit{LLVM IR for if/then/else}. Accessed the 7th of February 2023. Available at: \url{https://llvm.org/docs/tutorial/MyFirstLanguageFrontend/LangImpl05.html#llvm-ir-for-if-then-else}
 \bibitem{phiinst} LLVM Language Reference. \textit{phi instruction}. Accessed the 7th of February 2023. Available at: \url{https://llvm.org/docs/LangRef.html#phi-instruction}

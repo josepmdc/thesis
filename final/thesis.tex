@@ -890,21 +890,21 @@ true, it will jump to the label \texttt{btrue}, otherwise to the label
 \texttt{bfalse}.
 
 In this case the two branches do the same thing: a jump to the label
-\texttt{end}. There we come across a concept called phi nodes \cite{phitutorial}.
-The phi nodes are kind of an inverted if. Depending on where we did the jump we
-will assign one value or another to the variable \texttt{retval}. If we come
-from \texttt{btrue}, \texttt{retval} is assigned \texttt{\%a}, and if we come
-from \texttt{bfalse} it is assigned to \texttt{\%b}.
+\texttt{end}. There we come across a concept called phi nodes
+\cite{phitutorial}\cite{phiinst}. The phi nodes are kind of an inverted if.
+Depending on where we did the jump we will assign one value or another to the
+variable \texttt{retval}. If we come from \texttt{btrue}, \texttt{retval} is
+assigned \texttt{\%a}, and if we come from \texttt{bfalse} it is assigned to
+\texttt{\%b}.
 
 Now, why do the two branches jump to the \texttt{end} tag and then do a
 conditional again in the \texttt{end} block? Couldn't we assign the value of
 \texttt{retval} directly inside the branch \texttt{btrue} or \texttt{bfalse} and
 spare us that third conditional? Well the answer is no, because then we would be
-generating code that is not in SSA form. And as we mentioned earlier, LLVM
-requires the generated code to be in SSA form (we would be assigning the value
-to \%retval in two different places, which is not SSA form, if we weren't using
-Phi nodes). And that's why phi nodes exist, to be able to solve this kind of
-problem.
+generating code that is not in SSA form (we would be assigning the value to
+\%retval in two different places if we weren't using Phi nodes). And as we
+mentioned earlier, LLVM requires the generated code to be in SSA form. And
+that's why phi nodes exist, to be able to solve this kind of problem.
 
 \subsubsection{LLVM API}
 
@@ -912,17 +912,17 @@ It's important to understand the LLVM IR, but generating all of that code by
 hand is a lot of work and it would require us to put a lot of infrastructure in
 place. Fortunately, LLVM comes with a C++ API, that makes generating the IR a
 lot easier. But there's a little problem, we are not using C++. Thankfully,
-there's a Rust library called Inkwell\cite{inkwell}, that offers a comfortable
+there's a Rust library called Inkwell \cite{inkwell}, that offers a comfortable
 and idiomatic Rust interface to the LLVM API. Under the hood it calls the C++
 API by using FFI (Foreign Function Interface).
 
 The API is made of several entities. The most fundamental one is the
 \textbf{\textit{BasicBlock}}, which represents the blocks that we find inside a
 function, i.e. the set of instructions we find within a label. If we group a
-bunch of BasicBlocks, we have an entity call \textbf{\textit{Function}}, which,
-you guess it represents a function in the IR. And by grouping a bunch of
-functions we get the \textbf{\textit{Module}} entity. As you may notice these
-entities represent the different parts that we saw when we talked about the IR.
+bunch of BasicBlocks, we have an entity call \textbf{\textit{Function}}, which
+represents a function in the IR. And by grouping a bunch of functions we get the
+\textbf{\textit{Module}} entity. As you may notice these entities represent the
+different parts that we saw when we talked about the IR.
 
 Another important entity is \textit{\textbf{Context}}. We just need and instance of it, 
 and it will keep track of the state of the compilation.
@@ -942,7 +942,7 @@ it's only useful for debugging).
 The previous call will generate the following code (which is the third line of
 the IR example we saw):
 
-\texttt{\%nom = icmp sgt i32 \%a, \%b}
+\texttt{\%0 = icmp sgt i32 \%a, \%b}
 
 \section{Results}
 The aim of this bachelor's thesis was to develop a programming language using
@@ -1033,7 +1033,7 @@ fn main() {
         }
         printf("\n");
         y = y + ystep;
-    }
+    };
 }
 \end{code}
 
@@ -1057,11 +1057,10 @@ future work and improvement, since, as stated, it takes a long time to develop a
 good language:
 
 \begin{itemize}
-    \item \textbf{New features}: The language presented in this paper, is very
-        limited. It would be interesting to add new features such as for loops
-        with ranges, a pipe operator similar to the one in Elixir, list 
-        comprehension like in Python, and many more features that would make 
-        the development process a lot more pleasant.
+    \item \textbf{New features}: It would be interesting to add new features
+        such as for loops with ranges, a pipe operator similar to the one in
+        Elixir, list comprehension like in Python, and many more features that
+        would make the development process a lot more pleasant.
     \item \textbf{Modules}: As of now, all code has to go on one file, there's
         no way to import code from another one. A module system has to be 
         designed and implemented in order to allow it.
@@ -1074,6 +1073,21 @@ good language:
         could be included with the compiler.
 \end{itemize}
 
+\renewcommand\refname{References}
+\begin{thebibliography}{11}
+\bibitem{kotlininterop} \textit{Calling Java from Kotlin}. Accessed the 6th of February 2023. Available at: \url{https://kotlinlang.org/docs/java-interop.html}
+\bibitem{elixirinterop} \textit{Erlang libraries from Elixir}. Accessed the 6th of February 2023. Available at: \url{https://elixir-lang.org/getting-started/erlang-libraries.html}
+\bibitem{repo} \textit{Craft Git Repository}. Accessed the 6th of February 2023. Available at: \\\url{https://github.com/josepmdc/craft}
+\bibitem{gocodegen}Go compiler. \textit{Generating machine code}. Accessed the 6th of February 2023. Available at: \url{https://github.com/golang/go/blob/master/src/cmd/compile/README.md#7-generating-machine-code}
+\bibitem{rustllvm} Guide to Rustc development. \textit{Code generation}. Accessed the 6th of February 2023. Available at: \url{https://rustc-dev-guide.rust-lang.org/backend/codegen.html}
+\bibitem{clangllvm} Clang compiler. Accessed the 6th of February 2023. Available at: \url{https://clang.llvm.org}
+\bibitem{rustsafety} Stanford CS 242: Programming Languages. \textit{Memory safety in Rust}. Accessed the 6th of February 2023. Available at: \url{https://stanford-cs242.github.io/f18/lectures/05-1-rust-memory-safety.html}
+\bibitem{sgt} LLVM Language Reference. \textit{icmp instruction}. Accessed the 7th of February 2023. Available at: \url{https://llvm.org/docs/LangRef.html#icmp-instruction}
+\bibitem{phitutorial} LLVM tutorial \textit{LLVM IR for if/then/else}. Accessed the 7th of February 2023. Available at: \url{https://llvm.org/docs/tutorial/MyFirstLanguageFrontend/LangImpl05.html#llvm-ir-for-if-then-else}
+\bibitem{phiinst} LLVM Language Reference. \textit{phi instruction}. Accessed the 7th of February 2023. Available at: \url{https://llvm.org/docs/LangRef.html#phi-instruction}
+\bibitem{inkwell} \textit{Inkwell Documentation}. Accessed the 4th of October 2023. Available at: \\\url{https://thedan64.github.io/inkwell/inkwell/index.html}
+\end{thebibliography}
+
 \renewcommand\refname{Bibliography}
 \begin{thebibliography}{11}
 \bibitem{ci} Nystrom, R. \textit{Crafting Interpreters}. Published July 2021. ISBN 0990582930.
@@ -1081,20 +1095,6 @@ good language:
 \bibitem{llvmtut} \textit{LLVM Kaleidoscope Tutorial: Implementing a Language with LLVM}. Accessed the 25th of October 2022. Available at: \url{https://llvm.org/docs/tutorial}
 \bibitem{llvm4plc} Rathi, M. \textit{A complete guide to LLVM for programming language creators}. Mukuls Blogs. Accessed the 2nd of November 2022. Available at: \\\url{https://mukulrathi.com/create-your-own-programming-language/llvm-ir-cpp-api-tutorial}
 \bibitem{mhlctllvm} \textit{Mapping High Level Constructs to LLVM IR}. Accessed the 20th of October 2022. Available at: \\\url{https://mapping-high-level-constructs-to-llvm-ir.readthedocs.io/en/latest/README.html}
-\end{thebibliography}
-
-\renewcommand\refname{References}
-\begin{thebibliography}{11}
-\bibitem{kotlininterop} \textit{Calling Java from Kotlin}. Accessed the 6th of February 2023. Available at: \url{https://kotlinlang.org/docs/java-interop.html}
-\bibitem{elixirinterop} \textit{Erlang libraries from Elixir}. Accessed the 6th of February 2023. Available at: \url{https://elixir-lang.org/getting-started/erlang-libraries.html}
-\bibitem{repo} \textit{Craft Git Repository}. Accessed the 6th of February 2022. Available at: \\\url{https://github.com/josepmdc/craft}
-\bibitem{inkwell} \textit{Inkwell Documentation}. Accessed the 4th of October 2022. Available at: \\\url{https://thedan64.github.io/inkwell/inkwell/index.html}
-\bibitem{gocodegen}Go compiler. \textit{Generating machine code}. Accessed the 6th of February 2023. Available at: \url{https://github.com/golang/go/blob/master/src/cmd/compile/README.md#7-generating-machine-code}
-\bibitem{rustllvm} Guide to Rustc development. \textit{Code generation}. Accessed the 6th of February 2023. Available at: \url{https://rustc-dev-guide.rust-lang.org/backend/codegen.html}
-\bibitem{clangllvm} Clang compiler. Accessed the 6th of February 2023. Available at: \url{https://clang.llvm.org}
-\bibitem{rustsafety} Stanford CS 242: Programming Languages. \textit{Memory safety in Rust}. Accessed the 6th of February 2023. Available at: \url{https://stanford-cs242.github.io/f18/lectures/05-1-rust-memory-safety.html}
-\bibitem{sgt} LLVM Language Reference. \textit{icmp instruction}. Accessed the 7th of February 2022. Available at: \url{https://llvm.org/docs/LangRef.html#icmp-instruction}
-\bibitem{phitutorial} LLVM tutorial \textit{LLVM IR for if/then/else}. Accessed the 7th of February 2022. Available at: \url{https://llvm.org/docs/tutorial/MyFirstLanguageFrontend/LangImpl05.html#llvm-ir-for-if-then-else}
 \end{thebibliography}
 
 \newpage

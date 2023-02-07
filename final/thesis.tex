@@ -665,10 +665,10 @@ that comes built in and gives great hints on how to improve the code.
 LLVM is a toolchain for building compilers, i.e. a set of tools that help us
 implementing compilers. It was created in 2003 by Chris Lattner (also creator of
 the Swift programming language) and has the support of companies like Apple
-(LLVM is a part integral part of XCode and Swift for iOS application
-development), Google, IBM or Intel. Currently, there are several mainstream
-programming languages that use it, such as C and C++ (via the Clang compiler),
-Rust, Swift, Crystal...
+(LLVM is an integral part of XCode and Swift for iOS application development),
+Google, IBM or Intel \cite{sponsors}. Currently, there are several mainstream programming
+languages that use it, such as C and C++ (via the Clang compiler), Rust, Swift,
+Crystal...
 
 As we said LLVM has a lot of tools, but among all them, the LLVM Core libraries
 are the most important and particularly relevant for us. We will be referring to 
@@ -832,7 +832,10 @@ fn parse_prototype() -> (Prototype, Err) {
 Once we have an AST, we can traverse it to generate the LLVM IR. Since this is a
 simple compiler, we are going to do the semantic analysis in this step. With 
 more complex compilers, we may want to create a specific step of semantic 
-analysis, but in our case it is not necessary.
+analysis, but in our case it is not necessary. Semantic analysis basically 
+checks things like if a variable exists when referencing it, or if the type of a
+variable is correct (for example if we are multiplying an integer with a struct,
+the semantic analyzer will catch it and throw a compilation error).
 
 LLVM has the concept of modules. A module contains all the information
 associated with one code file. If we have multiple files, we simply have to
@@ -893,7 +896,7 @@ In this case the two branches do the same thing: a jump to the label
 \texttt{end}. There we come across a concept called phi nodes
 \cite{phitutorial}\cite{phiinst}. The phi nodes are kind of an inverted if.
 Depending on where we did the jump we will assign one value or another to the
-variable \texttt{retval}. If we come from \texttt{btrue}, \texttt{retval} is
+variable \texttt{\%retval}. If we come from \texttt{btrue}, \texttt{\%retval} is
 assigned \texttt{\%a}, and if we come from \texttt{bfalse} it is assigned to
 \texttt{\%b}.
 
@@ -991,7 +994,6 @@ fn main() {
 \end{code}
 
 Or this which prints an approximation of the Mandelbrot set:
-\newpage
 
 \begin{code}
 fn mandelbrot(a: f64, b: f64) f64 {
@@ -1075,6 +1077,7 @@ good language:
 
 \renewcommand\refname{References}
 \begin{thebibliography}{11}
+\bibitem{sponsors} LLVM Foundation sponsors. Accessed the 7th of February 2023. Available at: \url{https://foundation.llvm.org/docs/sponsors/}
 \bibitem{kotlininterop} \textit{Calling Java from Kotlin}. Accessed the 6th of February 2023. Available at: \url{https://kotlinlang.org/docs/java-interop.html}
 \bibitem{elixirinterop} \textit{Erlang libraries from Elixir}. Accessed the 6th of February 2023. Available at: \url{https://elixir-lang.org/getting-started/erlang-libraries.html}
 \bibitem{repo} \textit{Craft Git Repository}. Accessed the 6th of February 2023. Available at: \\\url{https://github.com/josepmdc/craft}

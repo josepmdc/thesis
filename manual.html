@@ -73,11 +73,19 @@
         (la ruta pot ser diferent, aquesta és la ruta en el meu sistema ArchLinux, en altres distros pot variar):
         <pre>export LLVM_SYS_140_PREFIX=/usr/lib/llvm14</pre>
 
-        I compilem:
+        <p>
+        Si al executar el compilador dona un "Segmentation Fault", segurament és
+        perquè està agafant una versió de LLVM diferent de la 14, i la llibreria
+        Inkwell que crida la API de C++ falla perque no troba les fucions.
+        Especificant el path de la versió correcta amb la variable d'entorn
+        anterior, ho hauría de solucionar.
+        </p>
+
+        Per compilar el projecte:
         <pre>cargo build --release</pre>
 
-        Aixó compilarà el projecte i creara un binari a la carpeta 'target/release'. El podem executar de la forma
-        següent:
+        Aixó descarregarà totes les llibreries de Rust, compilarà el projecte i creara un binari a la carpeta 'target/release'.
+        El podem executar de la forma següent:
         <pre>./target/release/craft &lt;fitxer a compilar&gt;</pre>
 
         Les opcions que té el compilador les podem veure amb el flag '--help':
@@ -95,6 +103,8 @@ Options:
         <pre>cargo run &lt;fitxer a compilar&gt;</pre>
 
         Això compilarà el projecte i l'executarà.
+
+        Per executar els tests, simplement executem <pre>cargo test</pre>
     </div>
 </body>
 
